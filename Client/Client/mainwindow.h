@@ -2,6 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
+#include <QTextEdit>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 class MainWindow : public QMainWindow
 {
@@ -10,6 +15,14 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+private:
+    QWidget *mainWindowWidget;
+    QTextEdit *contentPlace;
+    QVBoxLayout *mainWindowLayout;
+    QHBoxLayout *bottomBarLayout;
+    QPushButton *bottomButtons[3];
+    void setLayout();
 };
 
 #endif // MAINWINDOW_H
