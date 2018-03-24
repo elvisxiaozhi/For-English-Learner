@@ -27,6 +27,7 @@ private:
     QThread *connectionThread;
     Connection *setConnection; //it has to be a pointer, or will show "QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread" error
     void setLayout();
+    void setConnectionThread();
 
 private slots:
     void disableBottomButtons();

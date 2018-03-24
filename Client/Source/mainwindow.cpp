@@ -5,13 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setLayout();
-    connectionThread = new QThread;
-    setConnection = new Connection();
-    setConnection->moveToThread(connectionThread);
-    connect(connectionThread, &QThread::started, setConnection, &Connection::connectToServer);
-    connect(connectionThread, &QThread::finished, connectionThread, &QThread::deleteLater);
-    connect(connectionThread, &QThread::finished, setConnection, &QObject::deleteLater);
-    connectionThread->start();
+    setConnectionThread();
 }
 
 MainWindow::~MainWindow()
@@ -50,6 +44,17 @@ void MainWindow::setLayout()
     disabledButtonNumber = 0;
     bottomButtons[1]->setText("Favorites");
     bottomButtons[2]->setText("About");
+}
+
+void MainWindow::setConnectionThread()
+{
+    connectionThread = new QThread;
+    setConnection = new Connection();
+    setConnection->moveToThread(connectionThread);
+    connect(connectionThread, &QThread::started, setConnection, &Connection::connectToServer);
+    connect(connectionThread, &QThread::finished, connectionThread, &QThread::deleteLater);
+    connect(connectionThread, &QThread::finished, setConnection, &QObject::deleteLater);
+    connectionThread->start();
 }
 
 void MainWindow::disableBottomButtons()

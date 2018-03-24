@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QThread>
 #include "connection.h"
 
 class MainWindow : public QMainWindow
@@ -13,11 +14,15 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+private:
     QWidget *mainWindowWidget;
     QTextEdit *contentPlace;
     QVBoxLayout *mainWindowLayout;
+    QThread *connectionThread;
+    Connection *setConnection;
     void setLayout();
-    Connection setConnection;
+    void setConnectionThread();
 };
 
 #endif // MAINWINDOW_H
