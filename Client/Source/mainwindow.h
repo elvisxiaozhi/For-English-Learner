@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QThread>
 #include "connection.h"
+#include "messageboxes.h"
 
 class MainWindow : public QMainWindow
 {
@@ -26,11 +27,14 @@ private:
     QPushButton *bottomButtons[3];
     QThread *connectionThread;
     Connection *setConnection; //it has to be a pointer, or will show "QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread" error
+    MessageBoxes setMsBox;
     void setLayout();
     void setConnectionThread();
 
 private slots:
     void disableBottomButtons();
+    void showReconnectMsBox();
+    void readMessages();
 };
 
 #endif // MAINWINDOW_H

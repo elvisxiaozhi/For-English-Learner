@@ -13,6 +13,7 @@ public:
     QTcpSocket *tcpSocket;
 
 signals:
+    void failedToConnect();
 
 public slots:
     void connectToServer();

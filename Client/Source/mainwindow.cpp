@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setLayout();
     setConnectionThread();
+    connect(setConnection->tcpSocket, &QTcpSocket::readyRead, this, &MainWindow::readMessages);
 }
 
 MainWindow::~MainWindow()
@@ -55,6 +56,7 @@ void MainWindow::setConnectionThread()
     connect(connectionThread, &QThread::finished, connectionThread, &QThread::deleteLater);
     connect(connectionThread, &QThread::finished, setConnection, &QObject::deleteLater);
     connectionThread->start();
+    connect(setConnection, &Connection::failedToConnect, this, &MainWindow::showReconnectMsBox);
 }
 
 void MainWindow::disableBottomButtons()
@@ -65,4 +67,19 @@ void MainWindow::disableBottomButtons()
             bottomButtons[i]->setEnabled(false);
         }
     }
+}
+
+void MainWindow::showReconnectMsBox()
+{
+    setMsBox.msBox.setWindowTitle("Failed to connect to server");
+    connect(&setMsBox, &MessageBoxes::reconnect, setConnection, &Connection::connectToServer);
+    setMsBox.showReconnectMsBox();
+}
+
+void MainWindow::readMessages()
+{
+    QDataStream readData(setConnection->tcpSocket);
+    QString messagesFromServer;
+    readData >> messagesFromServer;
+    qDebug() << messagesFromServer;
 }

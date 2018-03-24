@@ -16,5 +16,6 @@ void Connection::connectToServer()
     }
     else {
         qDebug() << "Failed to connect to server.";
+        emit failedToConnect();
     }
 }

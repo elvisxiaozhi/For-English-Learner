@@ -27,8 +27,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    connection.cpp
+    connection.cpp \
+    messageboxes.cpp
 
 HEADERS += \
         mainwindow.h \
-    connection.h
+    connection.h \
+    messageboxes.h

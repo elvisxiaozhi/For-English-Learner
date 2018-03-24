@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setLayout();
     setConnectionThread();
+    connect(setConnection->tcpServer, &QTcpServer::newConnection, this, &MainWindow::sendMessages);
 }
 
 MainWindow::~MainWindow()
@@ -36,4 +37,13 @@ void MainWindow::setConnectionThread()
     connect(connectionThread, &QThread::finished, connectionThread, &QThread::deleteLater);
     connect(connectionThread, &QThread::finished, setConnection, &QObject::deleteLater);
     connectionThread->start();
+}
+
+void MainWindow::sendMessages()
+{
+    QByteArray messagesToClients;
+    QDataStream out(&messagesToClients, QIODevice::WriteOnly);
+    out << contentPlace->toPlainText();
+    QTcpSocket *tcpSocket = setConnection->tcpServer->nextPendingConnection();
+    tcpSocket->write(messagesToClients);
 }

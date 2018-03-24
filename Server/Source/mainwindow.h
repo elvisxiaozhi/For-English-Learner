@@ -23,6 +23,9 @@ private:
     Connection *setConnection;
     void setLayout();
     void setConnectionThread();
+
+private slots:
+    void sendMessages();
 };
 
 #endif // MAINWINDOW_H
