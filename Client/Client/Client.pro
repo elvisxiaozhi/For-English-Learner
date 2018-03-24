@@ -25,9 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
-    bottomlabels.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h \
-    bottomlabels.h
+        mainwindow.h

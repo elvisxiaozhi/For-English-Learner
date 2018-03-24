@@ -17,12 +17,16 @@ public:
     ~MainWindow();
 
 private:
+    int disabledButtonNumber;
     QWidget *mainWindowWidget;
     QTextEdit *contentPlace;
     QVBoxLayout *mainWindowLayout;
     QHBoxLayout *bottomBarLayout;
     QPushButton *bottomButtons[3];
     void setLayout();
+
+private slots:
+    void disableBottomButtons();
 };
 
 #endif // MAINWINDOW_H
