@@ -2,11 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QLabel>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QThread>
+#include "connection.h"
 
 class MainWindow : public QMainWindow
 {
@@ -23,6 +24,8 @@ private:
     QVBoxLayout *mainWindowLayout;
     QHBoxLayout *bottomBarLayout;
     QPushButton *bottomButtons[3];
+    QThread *connectionThread;
+    Connection *setConnection; //it has to be a pointer, or will show "QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread" error
     void setLayout();
 
 private slots:

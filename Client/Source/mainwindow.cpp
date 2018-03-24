@@ -5,6 +5,13 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setLayout();
+    connectionThread = new QThread;
+    setConnection = new Connection();
+    setConnection->moveToThread(connectionThread);
+    connect(connectionThread, &QThread::started, setConnection, &Connection::connectToServer);
+    connect(connectionThread, &QThread::finished, connectionThread, &QThread::deleteLater);
+    connect(connectionThread, &QThread::finished, setConnection, &QObject::deleteLater);
+    connectionThread->start();
 }
 
 MainWindow::~MainWindow()
@@ -14,7 +21,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::setLayout()
 {
-    setWindowTitle("For English Learners");
+    setWindowTitle("For English Learners(Client)");
 
     mainWindowWidget = new QWidget(this);
     setCentralWidget(mainWindowWidget);
