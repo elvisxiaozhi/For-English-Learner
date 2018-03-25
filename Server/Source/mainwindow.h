@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QTextEdit>
+#include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QThread>
 #include "connection.h"
 
@@ -18,13 +20,17 @@ public:
 private:
     QWidget *mainWindowWidget;
     QTextEdit *contentPlace;
+    QPushButton *sendButton;
     QVBoxLayout *mainWindowLayout;
+    QHBoxLayout *bottomBarLayout;
     QThread *connectionThread;
     Connection *setConnection;
+    QVector<QTcpSocket*> connectedClients;
     void setLayout();
     void setConnectionThread();
 
 private slots:
+    void newClientConnected();
     void sendMessages();
 };
 

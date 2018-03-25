@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setLayout();
     setConnectionThread();
+    connect(setConnection->tcpServer, &QTcpServer::newConnection, this, &MainWindow::newClientConnected);
     connect(setConnection->tcpServer, &QTcpServer::newConnection, this, &MainWindow::sendMessages);
 }
 
@@ -27,6 +28,16 @@ void MainWindow::setLayout()
     contentPlace->setMinimumSize(400, 300);
     contentPlace->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainWindowLayout->addWidget(contentPlace);
+
+    bottomBarLayout = new QHBoxLayout;
+    mainWindowLayout->addLayout(bottomBarLayout);
+
+    QSpacerItem *btnSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+    bottomBarLayout->addSpacerItem(btnSpacer);
+    sendButton = new QPushButton(mainWindowWidget);
+    sendButton->setText("Send");
+    connect(sendButton, &QPushButton::clicked, this, &MainWindow::sendMessages);
+    bottomBarLayout->addWidget(sendButton);
 }
 
 void MainWindow::setConnectionThread()
@@ -39,11 +50,19 @@ void MainWindow::setConnectionThread()
     connectionThread->start();
 }
 
+void MainWindow::newClientConnected()
+{
+    QTcpSocket *newClientSocket = setConnection->tcpServer->nextPendingConnection();
+    connectedClients.push_back(newClientSocket);
+    qDebug() << "Online clients number: " << connectedClients.size();
+}
+
 void MainWindow::sendMessages()
 {
     QByteArray messagesToClients;
     QDataStream out(&messagesToClients, QIODevice::WriteOnly);
     out << contentPlace->toPlainText();
-    QTcpSocket *tcpSocket = setConnection->tcpServer->nextPendingConnection();
-    tcpSocket->write(messagesToClients);
+    foreach (QTcpSocket *clientSocket, connectedClients) {
+        clientSocket->write(messagesToClients);
+    }
 }

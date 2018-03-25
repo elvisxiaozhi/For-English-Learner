@@ -4,6 +4,8 @@
 Connection::Connection(QObject *parent) : QObject(parent)
 {
     tcpSocket = new QTcpSocket(this);
+    connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Connection::getError);
+
 }
 
 void Connection::connectToServer()
@@ -14,8 +16,15 @@ void Connection::connectToServer()
     if(tcpSocket->waitForConnected()) {
         qDebug() << "Connected to server";
     }
-    else {
-        qDebug() << "Failed to connect to server.";
-        emit failedToConnect();
+}
+
+void Connection::getError(QAbstractSocket::SocketError error)
+{
+    qDebug() << "Error: " << error;
+    if(error == 0) {
+        emit connectionRefusedError();
+    }
+    if(error == 1) {
+        emit remoteHostClosedError();
     }
 }

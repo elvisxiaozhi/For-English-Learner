@@ -14,9 +14,12 @@ public:
 
 signals:
     void failedToConnect();
+    void connectionRefusedError();
+    void remoteHostClosedError();
 
 public slots:
     void connectToServer();
+    void getError(QAbstractSocket::SocketError);
 };
 
 #endif // CONNECTION_H

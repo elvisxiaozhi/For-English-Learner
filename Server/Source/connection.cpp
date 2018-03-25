@@ -2,6 +2,6 @@
 
 Connection::Connection(QObject *parent) : QObject(parent)
 {
-    tcpServer = new QTcpServer(this);
+    tcpServer = new QTcpServer; //can not set parent there, or error will show
     tcpServer->listen(QHostAddress::Any, 6666);
 }
