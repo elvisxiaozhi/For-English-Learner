@@ -1,5 +1,8 @@
 #include "widget.h"
 #include "ui_widget.h"
+#include <QEvent>
+#include <QKeyEvent>
+#include <QDebug>
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -19,10 +22,22 @@ void Widget::setWidgetLayout()
 {
     setWindowTitle("Tic Tac Toe");
 
+    ui->difficultyMode->addItem("Easy");
+    ui->difficultyMode->addItem("Medium");
+    ui->difficultyMode->addItem("Impossible");
+    ui->difficultyMode->addItem("Play against a friend");
+
+    ui->difficultyMode->setCurrentIndex(1);
+
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
 
     setStyleSheet(
+                "QComboBox { border: 0px; padding: 8px 8px 8px 8px; color: #696969; font: 15px; font-weight: 700; }"
+                "QComboBox::drop-down { border: 0px; }"
+                "QComboBox::down-arrow { image: url(:/icons/down-arrow.png); }"
+                "QComboBox::down-arrow:on { image: url(:/icons/up-arrow.png); }"
+                "QComboBox QAbstractItemView { selection-background-color: #D3D3D3; color: #A9A9A9; }"
                 "QToolButton { background: white; border: 0px; padding: 5px 20px 2px 30px; }"
                 ".QToolButton#cross { border-bottom: 3px solid #00cccc; }"
                 ".QToolButton#circle { border-bottom: 3px solid white; }"

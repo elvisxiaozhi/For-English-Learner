@@ -19,6 +19,9 @@ private:
     Ui::Widget *ui;
 
     void setWidgetLayout();
+
+//protected:
+//    bool eventFilter(QObject *watched, QEvent *event);
 };
 
 #endif // WIDGET_H

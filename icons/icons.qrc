@@ -2,5 +2,7 @@
     <qresource prefix="/icons">
         <file>circle.png</file>
         <file>cross.png</file>
+        <file>down-arrow.png</file>
+        <file>up-arrow.png</file>
     </qresource>
 </RCC>
