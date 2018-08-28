@@ -97,7 +97,7 @@
         <enum>Qt::RightToLeft</enum>
        </property>
        <property name="text">
-        <string>-</string>
+        <string>0</string>
        </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -116,7 +116,7 @@
         <enum>Qt::RightToLeft</enum>
        </property>
        <property name="text">
-        <string>-</string>
+        <string>0</string>
        </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextBesideIcon</enum>

@@ -33,5 +33,7 @@ HEADERS += \
 FORMS += \
         widget.ui
 
+RC_ICONS += \../icons/tic-tac-toe.ico
+
 RESOURCES += \
     ../icons/icons.qrc
