@@ -1,2 +1,6 @@
-<!DOCTYPE RCC>
-<RCC version="1.0"/>
+<RCC>
+    <qresource prefix="/icons">
+        <file>circle.png</file>
+        <file>cross.png</file>
+    </qresource>
+</RCC>
