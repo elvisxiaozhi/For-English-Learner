@@ -20,8 +20,8 @@ private:
 
     void setWidgetLayout();
 
-//protected:
-//    bool eventFilter(QObject *watched, QEvent *event);
+private slots:
+    void toolBtnClicked(bool);
 };
 
 #endif // WIDGET_H
