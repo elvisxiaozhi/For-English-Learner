@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include "chesslbl.h"
 
 namespace Ui {
 class Widget;
@@ -17,6 +18,7 @@ public:
 
 private:
     Ui::Widget *ui;
+    QVector<ChessLbl *> lblVec;
 
     void setWidgetLayout();
 

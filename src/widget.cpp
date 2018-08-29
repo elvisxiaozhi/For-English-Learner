@@ -32,6 +32,13 @@ void Widget::setWidgetLayout()
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
 
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            ChessLbl *lbl = new ChessLbl(ui->chessboard, 3 * i + j);
+            ui->gridLayout->addWidget(lbl, i, j);
+        }
+    }
+
     setStyleSheet(
                 "QComboBox { border: 0px; padding: 8px 8px 8px 8px; color: #696969; font: 15px; font-weight: 700; }"
                 "QComboBox::drop-down { border: 0px; }"
