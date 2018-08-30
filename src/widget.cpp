@@ -3,6 +3,9 @@
 #include <QEvent>
 #include <QKeyEvent>
 
+int Widget::crossWinningTimes = 0;
+int Widget::circleWinningTimes = 0;
+
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
@@ -181,6 +184,10 @@ void Widget::lblClicked(int row, int col)
 
             result->show();
             result->showResult(checkWin());
+
+            //put this after showResult(int);
+            ui->cross->setText(QString::number(crossWinningTimes));
+            ui->circle->setText(QString::number(circleWinningTimes));
         }
     }
 }

@@ -1,5 +1,6 @@
 #include "resultwidget.h"
 #include "ui_resultwidget.h"
+#include "widget.h"
 
 ResultWidget::ResultWidget(QWidget *parent) :
     QWidget(parent),
@@ -25,11 +26,15 @@ void ResultWidget::showResult(int result)
         ui->cross->hide();
         ui->circle->show();
         ui->result->setText("WINNER!");
+
+        ++Widget::circleWinningTimes;
         break;
     case 1:
         ui->cross->show();
         ui->circle->hide();
         ui->result->setText("WINNER!");
+
+        ++Widget::crossWinningTimes;
         break;
     default:
         ui->cross->show();
