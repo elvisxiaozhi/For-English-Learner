@@ -39,6 +39,10 @@ void Widget::setWidgetLayout()
 
     setLbl();
 
+    result = new ResultWidget(this);
+    ui->gridLayout->addWidget(result);
+    result->hide();
+
     setStyleSheet(
                 "QComboBox { border: 0px; padding: 8px 8px 8px 8px; color: #696969; font: 15px; font-weight: 700; }"
                 "QComboBox::drop-down { border: 0px; }"
@@ -65,6 +69,7 @@ void Widget::setLbl()
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             ChessLbl *lbl = new ChessLbl(ui->chessboard, i, j);
+            lbl->show();
 
             lblArr[i][j] = lbl;
 
@@ -165,14 +170,17 @@ void Widget::lblClicked(int row, int col)
             ui->msLbl->setText("X Turn");
         }
 
-        if(checkWin() == 0) {
-            qDebug() << "O win";
-        }
-        else if(checkWin() == 1) {
-            qDebug() << "X win";
-        }
-        else if(checkWin() == 2) {
-            qDebug() << "Draw";
+        if(checkWin() != 3) {
+            ui->msLbl->setText("Game Over");
+
+            for(int i = 0; i < 3; ++i) {
+                for(int j = 0; j < 3; ++j) {
+                    lblArr[i][j]->hide();
+                }
+            }
+
+            result->show();
+            result->showResult(checkWin());
         }
     }
 }
@@ -184,6 +192,8 @@ void Widget::restartGame()
             delete lblArr[i][j];
         }
     }
+
+    result->hide();
 
     ui->msLbl->setText("Start game or select player");
 

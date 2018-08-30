@@ -26,14 +26,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         widget.cpp \
-    chesslbl.cpp
+    chesslbl.cpp \
+    resultwidget.cpp
 
 HEADERS += \
         widget.h \
-    chesslbl.h
+    chesslbl.h \
+    resultwidget.h
 
 FORMS += \
-        widget.ui
+        widget.ui \
+    resultwidget.ui
 
 RC_ICONS += \../icons/tic-tac-toe.ico
 

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "chesslbl.h"
+#include "resultwidget.h"
 
 namespace Ui {
 class Widget;
@@ -20,6 +21,7 @@ private:
     Ui::Widget *ui;
     ChessLbl **lblArr[3];
     bool isXTurn;
+    ResultWidget *result;
 
     void setWidgetLayout();
     void setLbl();
