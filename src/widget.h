@@ -18,17 +18,17 @@ public:
 
 private:
     Ui::Widget *ui;
-    QVector<ChessLbl *> lblVec;
+    ChessLbl **lblArr[3];
     bool isXTurn;
 
     void setWidgetLayout();
     void setLbl();
-    void checkWin();
-    int checkEightDirections(int);
+    int checkWin();
+    bool isWinning(int);
 
 private slots:
     void toolBtnClicked(bool);
-    void lblClicked(int);
+    void lblClicked(int, int);
     void restartGame();
 };
 

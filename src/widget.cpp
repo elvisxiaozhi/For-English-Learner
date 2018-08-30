@@ -11,6 +11,10 @@ Widget::Widget(QWidget *parent) :
 
     isXTurn = true;
 
+    for(int i = 0; i < 3; ++i) {
+        lblArr[i] = new ChessLbl *[3];
+    }
+
     setWidgetLayout();
 }
 
@@ -60,8 +64,10 @@ void Widget::setLbl()
 {
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
-            ChessLbl *lbl = new ChessLbl(ui->chessboard, 3 * i + j);
-            lblVec.push_back(lbl);
+            ChessLbl *lbl = new ChessLbl(ui->chessboard, i, j);
+
+            lblArr[i][j] = lbl;
+
             ui->gridLayout->addWidget(lbl, i, j);
 
             connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
@@ -69,42 +75,57 @@ void Widget::setLbl()
     }
 }
 
-void Widget::checkWin()
+int Widget::checkWin()
 {
     int filledSpace = 0;
-    for(int i = 0; i < lblVec.size(); ++i) {
-        if(lblVec[i]->isCross == 0 || lblVec[i]->isCross == 1) {
-            checkEightDirections(i);
-        }
-        else {
-            ++filledSpace;
-            if(filledSpace == 9) {
-                qDebug() << "Draw";
-                break;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == 0 || lblArr[i][j]->isCross == 1) {
+                if(isWinning(lblArr[i][j]->isCross)) {
+                    return lblArr[i][j]->isCross;
+                }
+
+                ++filledSpace;
             }
         }
     }
+
+    if(filledSpace == 9) {
+        return 2;
+    }
+
+    return 3;
 }
 
-int Widget::checkEightDirections(int index)
+bool Widget::isWinning(int isCross)
 {
-    for(int i = -4; i < 5; ++i) {
-        if(i == 0) {
-            continue;
+    QVector<std::pair<int, int> > posVec;
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == isCross) {
+                posVec.push_back(std::make_pair(i, j));
+            }
         }
-        else {
-            if(index + i >= 0 && index + i <= 8) {
-                if(lblVec[index + i]->isCross == lblVec[index]->isCross) {
-                    if(index + i + i >= 0 && index + i + i <= 8) {
-                        if(lblVec[index + i + i]->isCross == lblVec[index]->isCross) {
-                            return lblVec[index]->isCross;
-                        }
+    }
+
+    if(posVec.size() >= 3) {
+        for(int i = 0; i < posVec.size() - 2; ++i) {
+            for(int j = i + 1; j < posVec.size() - 1; ++j) {
+                int rowDiff1 = posVec[i].first - posVec[j].first;
+                int colDiff1 = posVec[i].second - posVec[j].second;
+                for(int k = j + 1; k < posVec.size(); ++k) {
+                    int rowDiff2 = posVec[j].first - posVec[k].first;
+                    int colDiff2 = posVec[j].second - posVec[k].second;
+                    if(rowDiff1 == rowDiff2 && colDiff1 == colDiff2) {
+                        return true;
                     }
                 }
             }
         }
     }
-    return 2;
+
+    return false;
 }
 
 void Widget::toolBtnClicked(bool)
@@ -123,12 +144,12 @@ void Widget::toolBtnClicked(bool)
     }
 }
 
-void Widget::lblClicked(int index)
+void Widget::lblClicked(int row, int col)
 {
-    if(lblVec[index]->pixmap()->isNull()) {
+    if(lblArr[row][col]->pixmap()->isNull() && checkWin() == 3) {
         if(isXTurn) {
-            lblVec[index]->setPixmap(QPixmap(":/icons/cross.png"));
-            lblVec[index]->isCross = 1;
+            lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
+            lblArr[row][col]->isCross = 1;
 
             emit ui->circle->click();
 
@@ -136,24 +157,33 @@ void Widget::lblClicked(int index)
 
         }
         else {
-            lblVec[index]->setPixmap(QPixmap(":/icons/circle.png"));
-            lblVec[index]->isCross = 0;
+            lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
+            lblArr[row][col]->isCross = 0;
 
             emit ui->cross->click();
 
             ui->msLbl->setText("X Turn");
         }
 
-        checkWin();
+        if(checkWin() == 0) {
+            qDebug() << "O win";
+        }
+        else if(checkWin() == 1) {
+            qDebug() << "X win";
+        }
+        else if(checkWin() == 2) {
+            qDebug() << "Draw";
+        }
     }
 }
 
 void Widget::restartGame()
 {
-    for(int i = 0; i < lblVec.size(); ++i) {
-        delete lblVec[i];
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            delete lblArr[i][j];
+        }
     }
-    lblVec.clear();
 
     ui->msLbl->setText("Start game or select player");
 
