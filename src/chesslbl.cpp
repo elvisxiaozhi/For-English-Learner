@@ -1,8 +1,13 @@
 #include "chesslbl.h"
+#include <QMouseEvent>
 
 ChessLbl::ChessLbl(QWidget *parent, int index) : QLabel(parent)
 {
+    this->index = index;
+    isCross = 2;
+
     setMinimumSize(87, 87);
+    setPixmap(QPixmap());
     setAlignment(Qt::AlignCenter);
     setBorder(index);
 }
@@ -27,5 +32,12 @@ void ChessLbl::setBorder(int index)
         break;
     default:
         break;
+    }
+}
+
+void ChessLbl::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton) {
+        emit clicked(index);
     }
 }

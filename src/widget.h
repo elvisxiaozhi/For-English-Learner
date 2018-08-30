@@ -19,11 +19,17 @@ public:
 private:
     Ui::Widget *ui;
     QVector<ChessLbl *> lblVec;
+    bool isXTurn;
 
     void setWidgetLayout();
+    void setLbl();
+    void checkWin();
+    int checkEightDirections(int);
 
 private slots:
     void toolBtnClicked(bool);
+    void lblClicked(int);
+    void restartGame();
 };
 
 #endif // WIDGET_H
