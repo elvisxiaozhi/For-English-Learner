@@ -1,6 +1,5 @@
 #include "widget.h"
 #include "ui_widget.h"
-#include <QEvent>
 #include <QKeyEvent>
 
 int Widget::crossWinningTimes = 0;
@@ -18,7 +17,11 @@ Widget::Widget(QWidget *parent) :
         lblArr[i] = new ChessLbl *[3];
     }
 
+    ui->difficultyMode->installEventFilter(this);
+
     setWidgetLayout();
+
+    connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &modeChanged);
 }
 
 Widget::~Widget()
@@ -136,6 +139,19 @@ bool Widget::isWinning(int isCross)
     return false;
 }
 
+bool Widget::eventFilter(QObject *watched, QEvent *event)
+{
+    if(ui->difficultyMode) {
+        if(ui->difficultyMode == watched && event->type() == QEvent::KeyPress){
+           QKeyEvent *key = static_cast<QKeyEvent *>(event);
+           if(!key->text().isEmpty())
+                return true;
+        }
+    }
+
+    return QObject::eventFilter(watched, event);
+}
+
 void Widget::toolBtnClicked(bool)
 {
     if(sender()->objectName() == "cross") {
@@ -210,4 +226,11 @@ void Widget::restartGame()
     isXTurn = true;
 
     setLbl();
+}
+
+void Widget::modeChanged(int index)
+{
+    qDebug() << index;
+
+    restartGame();
 }
