@@ -28,6 +28,7 @@ private:
     void setLbl();
     int checkWin();
     bool isWinning(int);
+    void blockToolBtnSignals();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
@@ -36,7 +37,6 @@ private slots:
     void toolBtnClicked(bool);
     void lblClicked(int, int);
     void restartGame();
-    void modeChanged(int);
 };
 
 #endif // WIDGET_H

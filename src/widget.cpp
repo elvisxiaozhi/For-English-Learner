@@ -21,7 +21,7 @@ Widget::Widget(QWidget *parent) :
 
     setWidgetLayout();
 
-    connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &modeChanged);
+    connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
 }
 
 Widget::~Widget()
@@ -139,6 +139,30 @@ bool Widget::isWinning(int isCross)
     return false;
 }
 
+void Widget::blockToolBtnSignals()
+{
+    if(ui->difficultyMode->currentIndex() == 3) {
+        ui->cross->blockSignals(true);
+        ui->circle->blockSignals(true);
+    }
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross != 2) {
+                if(isXTurn) {
+                    ui->cross->blockSignals(true);
+                    ui->circle->blockSignals(false);
+                }
+                else {
+                    ui->cross->blockSignals(false);
+                    ui->circle->blockSignals(true);
+                }
+                return;
+            }
+        }
+    }
+}
+
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
     if(ui->difficultyMode) {
@@ -175,6 +199,8 @@ void Widget::lblClicked(int row, int col)
             lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
             lblArr[row][col]->isCross = 1;
 
+            blockToolBtnSignals();
+
             emit ui->circle->click();
 
             ui->msLbl->setText("O Turn");
@@ -183,6 +209,8 @@ void Widget::lblClicked(int row, int col)
         else {
             lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
             lblArr[row][col]->isCross = 0;
+
+            blockToolBtnSignals();
 
             emit ui->cross->click();
 
@@ -226,11 +254,6 @@ void Widget::restartGame()
     isXTurn = true;
 
     setLbl();
-}
 
-void Widget::modeChanged(int index)
-{
-    qDebug() << index;
-
-    restartGame();
+    blockToolBtnSignals();
 }
