@@ -46,7 +46,7 @@ void Widget::setWidgetLayout()
     setLbl();
 
     result = new ResultWidget(this);
-    ui->gridLayout->addWidget(result);
+    ui->gridLayout->addWidget(result, 0, 3, 3, 3);
     result->hide();
 
     setStyleSheet(
@@ -75,7 +75,6 @@ void Widget::setLbl()
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             ChessLbl *lbl = new ChessLbl(ui->chessboard, i, j);
-            lbl->show();
 
             lblArr[i][j] = lbl;
 
@@ -163,6 +162,39 @@ void Widget::blockToolBtnSignals()
     }
 }
 
+void Widget::playWithComputer()
+{
+    if(checkWin() == 3) {
+        switch (ui->difficultyMode->currentIndex()) {
+        case 1:
+            easyMode();
+            break;
+        default:
+            break;
+        }
+
+        if(isXTurn) {
+            isXTurn = false;
+        }
+        else {
+            isXTurn = true;
+        }
+    }
+}
+
+void Widget::easyMode()
+{
+    while(true) {
+        int row = rand() % 3;
+        int col = rand() % 3;
+        if(lblArr[row][col]->isCross == 2) {
+            lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
+            lblArr[row][col]->isCross = 0;
+            break;
+        }
+    }
+}
+
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
     if(ui->difficultyMode) {
@@ -190,6 +222,8 @@ void Widget::toolBtnClicked(bool)
 
         isXTurn = false;
     }
+
+    playWithComputer();
 }
 
 void Widget::lblClicked(int row, int col)
@@ -219,12 +253,6 @@ void Widget::lblClicked(int row, int col)
 
         if(checkWin() != 3) {
             ui->msLbl->setText("Game Over");
-
-            for(int i = 0; i < 3; ++i) {
-                for(int j = 0; j < 3; ++j) {
-                    lblArr[i][j]->hide();
-                }
-            }
 
             result->show();
             result->showResult(checkWin());

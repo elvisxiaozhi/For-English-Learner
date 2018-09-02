@@ -29,6 +29,8 @@ private:
     int checkWin();
     bool isWinning(int);
     void blockToolBtnSignals();
+    void playWithComputer();
+    void easyMode();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
