@@ -29,8 +29,9 @@ private:
     int checkWin();
     bool isWinning(int);
     void blockToolBtnSignals();
-    void playWithComputer();
+    void computerTurn();
     void easyMode();
+    QMap<std::pair<int, int>, int> getAvaiablePlaces();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);

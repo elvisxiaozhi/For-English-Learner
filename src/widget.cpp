@@ -162,22 +162,18 @@ void Widget::blockToolBtnSignals()
     }
 }
 
-void Widget::playWithComputer()
+void Widget::computerTurn()
 {
     if(checkWin() == 3) {
         switch (ui->difficultyMode->currentIndex()) {
+        case 0:
+            easyMode();
+            break;
         case 1:
             easyMode();
             break;
         default:
             break;
-        }
-
-        if(isXTurn) {
-            isXTurn = false;
-        }
-        else {
-            isXTurn = true;
         }
     }
 }
@@ -188,11 +184,30 @@ void Widget::easyMode()
         int row = rand() % 3;
         int col = rand() % 3;
         if(lblArr[row][col]->isCross == 2) {
-            lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
-            lblArr[row][col]->isCross = 0;
+            if(isXTurn) {
+                lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
+                lblArr[row][col]->isCross = 1;
+            }
+            else {
+                lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
+                lblArr[row][col]->isCross = 0;
+            }
             break;
         }
     }
+}
+
+QMap<std::pair<int, int>, int> Widget::getAvaiablePlaces()
+{
+    QMap<std::pair<int, int>, int> scoreMap;
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == 2) {
+                scoreMap.insert(std::make_pair(i, j), 0);
+            }
+        }
+    }
+    return scoreMap;
 }
 
 bool Widget::eventFilter(QObject *watched, QEvent *event)
@@ -223,7 +238,7 @@ void Widget::toolBtnClicked(bool)
         isXTurn = false;
     }
 
-    playWithComputer();
+    computerTurn();
 }
 
 void Widget::lblClicked(int row, int col)
