@@ -210,6 +210,28 @@ QMap<std::pair<int, int>, int> Widget::getAvaiablePlaces()
     return scoreMap;
 }
 
+int **Widget::getCurrentBoard()
+{
+    int **board = nullptr;
+    board = new int *[3];
+    for(int i = 0; i < 3; ++i) {
+        board[i] = new int[3];
+        for(int j = 0; j < 3; ++j) {
+            board[i][j] = lblArr[i][j]->isCross;
+        }
+    }
+    return board;
+}
+
+void Widget::restoreBoard(int **board)
+{
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            lblArr[i][j]->isCross = board[i][j];
+        }
+    }
+}
+
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
     if(ui->difficultyMode) {

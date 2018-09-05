@@ -32,6 +32,8 @@ private:
     void computerTurn();
     void easyMode();
     QMap<std::pair<int, int>, int> getAvaiablePlaces();
+    int **getCurrentBoard();
+    void restoreBoard(int **);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
