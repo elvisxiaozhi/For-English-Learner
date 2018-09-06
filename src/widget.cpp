@@ -22,6 +22,8 @@ Widget::Widget(QWidget *parent) :
     setWidgetLayout();
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
+
+    miniMax();
 }
 
 Widget::~Widget()
@@ -83,6 +85,26 @@ void Widget::setLbl()
             connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
         }
     }
+
+    lblArr[0][0]->isCross = 0;
+    lblArr[0][2]->isCross = 1;
+    lblArr[1][0]->isCross = 1;
+    lblArr[2][0]->isCross = 1;
+    lblArr[2][1]->isCross = 0;
+    lblArr[2][2]->isCross = 0;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == 1) {
+                lblArr[i][j]->setPixmap(QPixmap(":/icons/cross.png"));
+            }
+            if(lblArr[i][j]->isCross == 0) {
+                lblArr[i][j]->setPixmap(QPixmap(":/icons/circle.png"));
+            }
+        }
+    }
+
+//    isXTurn = true;
 }
 
 int Widget::checkWin()
@@ -169,9 +191,9 @@ void Widget::computerTurn()
         case 0:
             easyMode();
             break;
-        case 1:
-            easyMode();
-            break;
+//        case 1:
+//            easyMode();
+//            break;
         default:
             break;
         }
@@ -219,7 +241,7 @@ void Widget::miniMax()
 
 //    findBestScore(score);
 
-    qDebug() << score;
+    qDebug() << score << isXTurn;
 }
 
 int **Widget::getCurrentBoard()
@@ -237,46 +259,78 @@ int **Widget::getCurrentBoard()
 
 void Widget::restoreBoard(int **board)
 {
+    int xShowTimes = 0;
+    int oShowTimes = 0;
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             lblArr[i][j]->isCross = board[i][j];
+
+            if(lblArr[i][j]->isCross == 0) {
+                ++xShowTimes;
+            }
+            else if(lblArr[i][j]->isCross == 1) {
+                ++oShowTimes;
+            }
         }
+    }
+
+    if(xShowTimes <= oShowTimes) {
+        isXTurn = true;
+    }
+    else {
+        isXTurn = false;
     }
 }
 
 void Widget::scoreMap(QMap<std::pair<int, int>, int> &score, int **board)
 {
     for(auto e : score.toStdMap()) {
-//        putLblOnBoard(e.first.first, e.first.second);
+        lblArr[e.first.first][e.first.second]->isCross = isXTurn;
+
+        toolBtnClicked(true);
+
+                qDebug() << e.first.first << e.first.second;
+
         if(checkWin() == 0) {
             score.insert(std::make_pair(e.first.first, e.first.second), e.second - 10);
 
-            restoreBoard(board);
+            qDebug() << "O";
         }
         else if(checkWin() == 1) {
             score.insert(std::make_pair(e.first.first, e.first.second), e.second + 10);
 
-            restoreBoard(board);
+            qDebug() << "X";
         }
         else if(checkWin() == 3) {
-            int **board2 = getCurrentBoard();
-            QMap<std::pair<int, int>, int> score2 = getAvaiablePlaces();
-            scoreMap(score2, board2);
-            score.insert(std::make_pair(e.first.first, e.first.second), e.second + findBestScore(score2));
-            restoreBoard(board2);
-            delete []board2;
+//            QMap<std::pair<int, int>, int> score2 = getAvaiablePlaces();
+//            scoreMap(score2, board);
+//            score.insert(std::make_pair(e.first.first, e.first.second), e.second + findBestScore(score2));
         }
-    }
 
-    findBestScore(score);
+        restoreBoard(board);
+    }
 }
 
 int Widget::findBestScore(QMap<std::pair<int, int>, int> &map)
 {
-    auto it = std::max_element(map.begin(), map.end(),
-        [](int a, int b) {
-            return a < b;
-        });
+    QMap<std::pair<int, int>, int>::iterator it;
+    if(isXTurn) {
+        it = std::max_element(map.begin(), map.end(),
+            [](int a, int b) {
+                return a < b;
+            });
+
+        qDebug() << "X";
+    }
+    else {
+        it = std::min_element(map.begin(), map.end(),
+            [](int a, int b) {
+                return a < b;
+            });
+
+         qDebug() << "O";
+    }
+
     return it.value();
 }
 
@@ -295,17 +349,17 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
 
 void Widget::toolBtnClicked(bool)
 {
-    if(sender()->objectName() == "cross") {
-        ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
-        ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
-
-        isXTurn = true;
-    }
-    else {
+    if(isXTurn) {
         ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid white; }");
         ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid #00cccc; }");
 
         isXTurn = false;
+    }
+    else {
+        ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
+        ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
+
+        isXTurn = true;
     }
 
     computerTurn();
