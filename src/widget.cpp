@@ -210,6 +210,18 @@ QMap<std::pair<int, int>, int> Widget::getAvaiablePlaces()
     return scoreMap;
 }
 
+void Widget::miniMax()
+{
+    int **board = getCurrentBoard();
+    QMap<std::pair<int, int>, int> score = getAvaiablePlaces();
+
+    scoreMap(score, board);
+
+//    findBestScore(score);
+
+    qDebug() << score;
+}
+
 int **Widget::getCurrentBoard()
 {
     int **board = nullptr;
@@ -230,6 +242,42 @@ void Widget::restoreBoard(int **board)
             lblArr[i][j]->isCross = board[i][j];
         }
     }
+}
+
+void Widget::scoreMap(QMap<std::pair<int, int>, int> &score, int **board)
+{
+    for(auto e : score.toStdMap()) {
+//        putLblOnBoard(e.first.first, e.first.second);
+        if(checkWin() == 0) {
+            score.insert(std::make_pair(e.first.first, e.first.second), e.second - 10);
+
+            restoreBoard(board);
+        }
+        else if(checkWin() == 1) {
+            score.insert(std::make_pair(e.first.first, e.first.second), e.second + 10);
+
+            restoreBoard(board);
+        }
+        else if(checkWin() == 3) {
+            int **board2 = getCurrentBoard();
+            QMap<std::pair<int, int>, int> score2 = getAvaiablePlaces();
+            scoreMap(score2, board2);
+            score.insert(std::make_pair(e.first.first, e.first.second), e.second + findBestScore(score2));
+            restoreBoard(board2);
+            delete []board2;
+        }
+    }
+
+    findBestScore(score);
+}
+
+int Widget::findBestScore(QMap<std::pair<int, int>, int> &map)
+{
+    auto it = std::max_element(map.begin(), map.end(),
+        [](int a, int b) {
+            return a < b;
+        });
+    return it.value();
 }
 
 bool Widget::eventFilter(QObject *watched, QEvent *event)

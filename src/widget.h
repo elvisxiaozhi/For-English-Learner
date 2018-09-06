@@ -32,8 +32,11 @@ private:
     void computerTurn();
     void easyMode();
     QMap<std::pair<int, int>, int> getAvaiablePlaces();
+    void miniMax();
     int **getCurrentBoard();
     void restoreBoard(int **);
+    void scoreMap(QMap<std::pair<int, int>, int> &, int **);
+    int findBestScore(QMap<std::pair<int, int>, int> &);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
