@@ -12,6 +12,7 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
 
     isXTurn = true;
+    depth = -1;
 
     for(int i = 0; i < 3; ++i) {
         lblArr[i] = new ChessLbl *[3];
@@ -87,6 +88,7 @@ void Widget::setLbl()
     }
 
     lblArr[0][0]->isCross = 0;
+//    lblArr[0][1]->isCross = 1;
     lblArr[0][2]->isCross = 1;
     lblArr[1][0]->isCross = 1;
     lblArr[2][0]->isCross = 1;
@@ -104,7 +106,7 @@ void Widget::setLbl()
         }
     }
 
-//    isXTurn = true;
+    isXTurn = false;
 }
 
 int Widget::checkWin()
@@ -219,29 +221,113 @@ void Widget::easyMode()
     }
 }
 
-QMap<std::pair<int, int>, int> Widget::getAvaiablePlaces()
+QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
 {
-    QMap<std::pair<int, int>, int> scoreMap;
+    QVector<std::pair<std::pair<int, int>, int > > scoreVec;
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             if(lblArr[i][j]->isCross == 2) {
-                scoreMap.insert(std::make_pair(i, j), 0);
+                scoreVec.push_back(std::make_pair(std::make_pair(i, j), 0));
             }
         }
     }
-    return scoreMap;
+
+    return scoreVec;
 }
 
 void Widget::miniMax()
 {
     int **board = getCurrentBoard();
-    QMap<std::pair<int, int>, int> score = getAvaiablePlaces();
 
-    scoreMap(score, board);
+    score.clear();
+    score = getAvaiablePlaces();
 
-//    findBestScore(score);
+    for(int i = 0; i < score.size(); ++i) {
+        lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
+        toolBtnClicked(true);
+
+        if(isXTurn) {
+            score[i].second = maxSearch();
+        }
+        else {
+            score[i].second = miniSearch();
+        }
+
+        depth = 0;
+        restoreBoard(board);
+    }
 
     qDebug() << score << isXTurn;
+}
+
+int Widget::maxSearch()
+{
+    ++depth;
+
+    if(checkWin() == 0) {
+        return -10;
+    }
+    if(checkWin() == 1) {
+        return 10;
+    }
+    if(checkWin() == 2) {
+        return 0;
+    }
+
+    int score = 0;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == 2) {
+                toolBtnClicked(true);
+                lblArr[i][j]->isCross = isXTurn;
+
+                score = std::max(score, miniSearch());
+
+                lblArr[i][j]->isCross = 2;
+            }
+        }
+    }
+
+    score -= depth;
+    qDebug() << score;
+
+    return score;
+}
+
+int Widget::miniSearch()
+{
+    ++depth;
+
+    if(checkWin() == 0) {
+        return -10;
+    }
+    if(checkWin() == 1) {
+        return 10;
+    }
+    if(checkWin() == 2) {
+        return 0;
+    }
+
+    int score = 0;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == 2) {
+                toolBtnClicked(true);
+                lblArr[i][j]->isCross = isXTurn;
+
+                score = std::min(score, maxSearch());
+
+                lblArr[i][j]->isCross = 2;
+            }
+        }
+    }
+
+    score += depth;
+    qDebug() << score;
+
+    return score;
 }
 
 int **Widget::getCurrentBoard()
@@ -282,33 +368,28 @@ void Widget::restoreBoard(int **board)
     }
 }
 
-void Widget::scoreMap(QMap<std::pair<int, int>, int> &score, int **board)
+void Widget::scoreVec(int index)
 {
-    for(auto e : score.toStdMap()) {
-        lblArr[e.first.first][e.first.second]->isCross = isXTurn;
+    QVector<std::pair<std::pair<int, int>, int > > tempScore = getAvaiablePlaces();
 
+    for(int i = 0; i < tempScore.size(); ++i) {
         toolBtnClicked(true);
 
-                qDebug() << e.first.first << e.first.second;
-
-        if(checkWin() == 0) {
-            score.insert(std::make_pair(e.first.first, e.first.second), e.second - 10);
-
-            qDebug() << "O";
+        if(checkWin() == 3) {
+            lblArr[tempScore[i].first.first][tempScore[i].first.second]->isCross = isXTurn;
+            scoreVec(i);
         }
-        else if(checkWin() == 1) {
-            score.insert(std::make_pair(e.first.first, e.first.second), e.second + 10);
-
-            qDebug() << "X";
+        else {
+            if(checkWin() == 0) {
+                score[index].second -= 10;
+            }
+            else if(checkWin() == 1) {
+                score[index].second += 10;
+            }
+            break;
         }
-        else if(checkWin() == 3) {
-//            QMap<std::pair<int, int>, int> score2 = getAvaiablePlaces();
-//            scoreMap(score2, board);
-//            score.insert(std::make_pair(e.first.first, e.first.second), e.second + findBestScore(score2));
-        }
-
-        restoreBoard(board);
     }
+
 }
 
 int Widget::findBestScore(QMap<std::pair<int, int>, int> &map)

@@ -23,6 +23,8 @@ private:
     ChessLbl **lblArr[3];
     bool isXTurn;
     ResultWidget *result;
+    QVector<std::pair<std::pair<int, int>, int > > score;
+    int depth;
 
     void setWidgetLayout();
     void setLbl();
@@ -31,11 +33,13 @@ private:
     void blockToolBtnSignals();
     void computerTurn();
     void easyMode();
-    QMap<std::pair<int, int>, int> getAvaiablePlaces();
+    QVector<std::pair<std::pair<int, int>, int > > getAvaiablePlaces();
     void miniMax();
+    int maxSearch();
+    int miniSearch();
     int **getCurrentBoard();
     void restoreBoard(int **);
-    void scoreMap(QMap<std::pair<int, int>, int> &, int **);
+    void scoreVec(int);
     int findBestScore(QMap<std::pair<int, int>, int> &);
 
 protected:
