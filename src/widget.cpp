@@ -236,11 +236,9 @@ void Widget::miniMax()
 int Widget::search()
 {
     if(checkWin() == 0) {
-        qDebug() << "O";
         return -10;
     }
     else if(checkWin() == 1) {
-        qDebug() << "X";
         return 10;
     }
     else if(checkWin() == 2) {
@@ -276,10 +274,6 @@ int Widget::search()
     else {
         score += depth;
     }
-
-    depth = 0;
-
-    qDebug() << score;
 
     return score;
 }
