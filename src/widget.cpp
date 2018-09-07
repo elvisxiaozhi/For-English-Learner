@@ -222,6 +222,8 @@ void Widget::miniMax()
         lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
         toolBtnClicked(true);
 
+//        score[i].second = search();
+
         if(isXTurn) {
             score[i].second = maxSearch();
         }
@@ -236,6 +238,54 @@ void Widget::miniMax()
     qDebug() << score << isXTurn;
 
     findBestMove(score);
+}
+
+int Widget::search()
+{
+    if(checkWin() == 0) {
+        return -10;
+    }
+    if(checkWin() == 1) {
+        return 10;
+    }
+    if(checkWin() == 2) {
+        return 0;
+    }
+
+    int score = 0;
+    int depth = 0;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == 2) {
+                toolBtnClicked(true);
+                lblArr[i][j]->isCross = isXTurn;
+
+                if(isXTurn) {
+                    score = std::max(score, search());
+                }
+                else {
+                    score = std::min(score, search());
+                }
+
+
+                ++depth;
+
+                lblArr[i][j]->isCross = 2;
+            }
+        }
+    }
+
+    if(isXTurn) {
+        score += depth;
+    }
+    else {
+        score -= depth;
+    }
+
+    qDebug() << score;
+
+    return score;
 }
 
 int Widget::maxSearch()
@@ -333,7 +383,6 @@ void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
         }
     }
 
-//    toolBtnClicked(true);
     lblClicked(row, col);
 }
 
