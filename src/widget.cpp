@@ -12,7 +12,7 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
 
     isXTurn = true;
-    depth = -1;
+    isXTurnTemp = true;
 
     for(int i = 0; i < 3; ++i) {
         lblArr[i] = new ChessLbl *[3];
@@ -214,10 +214,9 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
 
 void Widget::miniMax()
 {
-    int **board = getCurrentBoard();
+    isXTurnTemp = isXTurn;
 
-    score.clear();
-    score = getAvaiablePlaces();
+    QVector<std::pair<std::pair<int, int>, int > > score = getAvaiablePlaces();
 
     for(int i = 0; i < score.size(); ++i) {
         lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
@@ -230,8 +229,8 @@ void Widget::miniMax()
             score[i].second = miniSearch();
         }
 
-        depth = 0;
-        restoreBoard(board);
+        lblArr[score[i].first.first][score[i].first.second]->isCross = 2;
+        isXTurn = isXTurnTemp;
     }
 
     qDebug() << score << isXTurn;
@@ -241,7 +240,7 @@ void Widget::miniMax()
 
 int Widget::maxSearch()
 {
-    ++depth;
+    int depth = 0;
 
     if(checkWin() == 0) {
         return -10;
@@ -262,6 +261,7 @@ int Widget::maxSearch()
                 lblArr[i][j]->isCross = isXTurn;
 
                 score = std::max(score, miniSearch());
+                ++depth;
 
                 lblArr[i][j]->isCross = 2;
             }
@@ -276,7 +276,7 @@ int Widget::maxSearch()
 
 int Widget::miniSearch()
 {
-    ++depth;
+    int depth = 0;
 
     if(checkWin() == 0) {
         return -10;
@@ -297,6 +297,7 @@ int Widget::miniSearch()
                 lblArr[i][j]->isCross = isXTurn;
 
                 score = std::min(score, maxSearch());
+                ++depth;
 
                 lblArr[i][j]->isCross = 2;
             }
@@ -307,68 +308,6 @@ int Widget::miniSearch()
     qDebug() << score;
 
     return score;
-}
-
-int **Widget::getCurrentBoard()
-{
-    int **board = nullptr;
-    board = new int *[3];
-    for(int i = 0; i < 3; ++i) {
-        board[i] = new int[3];
-        for(int j = 0; j < 3; ++j) {
-            board[i][j] = lblArr[i][j]->isCross;
-        }
-    }
-    return board;
-}
-
-void Widget::restoreBoard(int **board)
-{
-    int xShowTimes = 0;
-    int oShowTimes = 0;
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            lblArr[i][j]->isCross = board[i][j];
-
-            if(lblArr[i][j]->isCross == 0) {
-                ++xShowTimes;
-            }
-            else if(lblArr[i][j]->isCross == 1) {
-                ++oShowTimes;
-            }
-        }
-    }
-
-    if(xShowTimes <= oShowTimes) {
-        isXTurn = true;
-    }
-    else {
-        isXTurn = false;
-    }
-}
-
-void Widget::scoreVec(int index)
-{
-    QVector<std::pair<std::pair<int, int>, int > > tempScore = getAvaiablePlaces();
-
-    for(int i = 0; i < tempScore.size(); ++i) {
-        toolBtnClicked(true);
-
-        if(checkWin() == 3) {
-            lblArr[tempScore[i].first.first][tempScore[i].first.second]->isCross = isXTurn;
-            scoreVec(i);
-        }
-        else {
-            if(checkWin() == 0) {
-                score[index].second -= 10;
-            }
-            else if(checkWin() == 1) {
-                score[index].second += 10;
-            }
-            break;
-        }
-    }
-
 }
 
 void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
@@ -394,7 +333,7 @@ void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
         }
     }
 
-    toolBtnClicked(true);
+//    toolBtnClicked(true);
     lblClicked(row, col);
 }
 

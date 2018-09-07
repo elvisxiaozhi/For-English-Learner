@@ -21,10 +21,8 @@ public:
 private:
     Ui::Widget *ui;
     ChessLbl **lblArr[3];
-    bool isXTurn;
+    bool isXTurn, isXTurnTemp;
     ResultWidget *result;
-    QVector<std::pair<std::pair<int, int>, int > > score;
-    int depth;
 
     void setWidgetLayout();
     void setLbl();
@@ -37,9 +35,6 @@ private:
     void miniMax();
     int maxSearch();
     int miniSearch();
-    int **getCurrentBoard();
-    void restoreBoard(int **);
-    void scoreVec(int);
     void findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
 
 protected:
