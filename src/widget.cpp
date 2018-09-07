@@ -261,7 +261,6 @@ int Widget::search()
                     score = std::min(score, search());
                 }
 
-
                 ++depth;
 
                 lblArr[i][j]->isCross = 2;
@@ -270,10 +269,10 @@ int Widget::search()
     }
 
     if(isXTurn) {
-        score += depth;
+        score -= depth;
     }
     else {
-        score -= depth;
+        score += depth;
     }
 
     qDebug() << score;
@@ -283,13 +282,10 @@ int Widget::search()
 
 void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
 {
-    int row = 0;
-    int col = 0;
+    int row = vec[0].first.first;
+    int col = vec[0].first.second;
 
     for(int i = 0; i < vec.size() - 1; ++i) {
-        row = vec[i].first.first;
-        col = vec[i].first.second;
-
         if(isXTurn) {
             if(vec[i].second < vec[i + 1].second) {
                 row = vec[i + 1].first.first;
