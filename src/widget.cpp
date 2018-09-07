@@ -222,14 +222,7 @@ void Widget::miniMax()
         lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
         toolBtnClicked(true);
 
-//        score[i].second = search();
-
-        if(isXTurn) {
-            score[i].second = maxSearch();
-        }
-        else {
-            score[i].second = miniSearch();
-        }
+        score[i].second = search();
 
         lblArr[score[i].first.first][score[i].first.second]->isCross = 2;
         isXTurn = isXTurnTemp;
@@ -283,78 +276,6 @@ int Widget::search()
         score -= depth;
     }
 
-    qDebug() << score;
-
-    return score;
-}
-
-int Widget::maxSearch()
-{
-    int depth = 0;
-
-    if(checkWin() == 0) {
-        return -10;
-    }
-    if(checkWin() == 1) {
-        return 10;
-    }
-    if(checkWin() == 2) {
-        return 0;
-    }
-
-    int score = 0;
-
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == 2) {
-                toolBtnClicked(true);
-                lblArr[i][j]->isCross = isXTurn;
-
-                score = std::max(score, miniSearch());
-                ++depth;
-
-                lblArr[i][j]->isCross = 2;
-            }
-        }
-    }
-
-    score -= depth;
-    qDebug() << score;
-
-    return score;
-}
-
-int Widget::miniSearch()
-{
-    int depth = 0;
-
-    if(checkWin() == 0) {
-        return -10;
-    }
-    if(checkWin() == 1) {
-        return 10;
-    }
-    if(checkWin() == 2) {
-        return 0;
-    }
-
-    int score = 0;
-
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == 2) {
-                toolBtnClicked(true);
-                lblArr[i][j]->isCross = isXTurn;
-
-                score = std::min(score, maxSearch());
-                ++depth;
-
-                lblArr[i][j]->isCross = 2;
-            }
-        }
-    }
-
-    score += depth;
     qDebug() << score;
 
     return score;

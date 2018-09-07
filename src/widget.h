@@ -34,8 +34,6 @@ private:
     QVector<std::pair<std::pair<int, int>, int > > getAvaiablePlaces();
     void miniMax();
     int search();
-    int maxSearch();
-    int miniSearch();
     void findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
 
 protected:
