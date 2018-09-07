@@ -84,27 +84,6 @@ void Widget::setLbl()
             connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
         }
     }
-
-//    lblArr[0][0]->isCross = 0;
-//    lblArr[0][1]->isCross = 1;
-//    lblArr[1][0]->isCross = 0;
-//    lblArr[1][1]->isCross = 1;
-//    lblArr[1][2]->isCross = 0;
-//    lblArr[2][1]->isCross = 1;
-//    lblArr[2][2]->isCross = 1;
-
-//    for(int i = 0; i < 3; ++i) {
-//        for(int j = 0; j < 3; ++j) {
-//            if(lblArr[i][j]->isCross == 0) {
-//                lblArr[i][j]->setPixmap(QPixmap(":/icons/circle.png"));
-//            }
-//            if(lblArr[i][j]->isCross == 1) {
-//                lblArr[i][j]->setPixmap(QPixmap(":/icons/cross.png"));
-//            }
-//        }
-//    }
-
-//    isXTurn = false;
 }
 
 int Widget::checkWin()
@@ -276,7 +255,6 @@ int Widget::search()
             if(lblArr[i][j]->isCross == 2) {
                 toolBtnClicked(true);
                 lblArr[i][j]->isCross = isXTurn;
-//                toolBtnClicked(true);
 
                 if(isXTurn) {
                     score = std::max(score, search());
