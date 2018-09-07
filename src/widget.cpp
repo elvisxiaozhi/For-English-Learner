@@ -84,6 +84,27 @@ void Widget::setLbl()
             connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
         }
     }
+
+//    lblArr[0][0]->isCross = 0;
+//    lblArr[0][1]->isCross = 1;
+//    lblArr[1][0]->isCross = 0;
+//    lblArr[1][1]->isCross = 1;
+//    lblArr[1][2]->isCross = 0;
+//    lblArr[2][1]->isCross = 1;
+//    lblArr[2][2]->isCross = 1;
+
+//    for(int i = 0; i < 3; ++i) {
+//        for(int j = 0; j < 3; ++j) {
+//            if(lblArr[i][j]->isCross == 0) {
+//                lblArr[i][j]->setPixmap(QPixmap(":/icons/circle.png"));
+//            }
+//            if(lblArr[i][j]->isCross == 1) {
+//                lblArr[i][j]->setPixmap(QPixmap(":/icons/cross.png"));
+//            }
+//        }
+//    }
+
+//    isXTurn = false;
 }
 
 int Widget::checkWin()
@@ -236,23 +257,26 @@ void Widget::miniMax()
 int Widget::search()
 {
     if(checkWin() == 0) {
+        qDebug() << "O";
         return -10;
     }
-    if(checkWin() == 1) {
+    else if(checkWin() == 1) {
+        qDebug() << "X";
         return 10;
     }
-    if(checkWin() == 2) {
+    else if(checkWin() == 2) {
         return 0;
     }
 
-    int score = 0;
     int depth = 0;
+    int score = 0;
 
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             if(lblArr[i][j]->isCross == 2) {
                 toolBtnClicked(true);
                 lblArr[i][j]->isCross = isXTurn;
+//                toolBtnClicked(true);
 
                 if(isXTurn) {
                     score = std::max(score, search());
@@ -274,6 +298,8 @@ int Widget::search()
     else {
         score += depth;
     }
+
+    depth = 0;
 
     qDebug() << score;
 
