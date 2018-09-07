@@ -23,8 +23,6 @@ Widget::Widget(QWidget *parent) :
     setWidgetLayout();
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
-
-    miniMax();
 }
 
 Widget::~Widget()
@@ -86,27 +84,6 @@ void Widget::setLbl()
             connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
         }
     }
-
-    lblArr[0][0]->isCross = 0;
-//    lblArr[0][1]->isCross = 1;
-    lblArr[0][2]->isCross = 1;
-    lblArr[1][0]->isCross = 1;
-    lblArr[2][0]->isCross = 1;
-    lblArr[2][1]->isCross = 0;
-    lblArr[2][2]->isCross = 0;
-
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == 1) {
-                lblArr[i][j]->setPixmap(QPixmap(":/icons/cross.png"));
-            }
-            if(lblArr[i][j]->isCross == 0) {
-                lblArr[i][j]->setPixmap(QPixmap(":/icons/circle.png"));
-            }
-        }
-    }
-
-    isXTurn = false;
 }
 
 int Widget::checkWin()
@@ -258,6 +235,8 @@ void Widget::miniMax()
     }
 
     qDebug() << score << isXTurn;
+
+    findBestMove(score);
 }
 
 int Widget::maxSearch()
@@ -392,27 +371,31 @@ void Widget::scoreVec(int index)
 
 }
 
-int Widget::findBestScore(QMap<std::pair<int, int>, int> &map)
+void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
 {
-    QMap<std::pair<int, int>, int>::iterator it;
-    if(isXTurn) {
-        it = std::max_element(map.begin(), map.end(),
-            [](int a, int b) {
-                return a < b;
-            });
+    int row = 0;
+    int col = 0;
 
-        qDebug() << "X";
+    for(int i = 0; i < vec.size() - 1; ++i) {
+        row = vec[i].first.first;
+        col = vec[i].first.second;
+
+        if(isXTurn) {
+            if(vec[i].second < vec[i + 1].second) {
+                row = vec[i + 1].first.first;
+                col = vec[i + 1].first.second;
+            }
+        }
+        else {
+            if(vec[i].second > vec[i + 1].second) {
+                row = vec[i + 1].first.first;
+                col = vec[i + 1].first.second;
+            }
+        }
     }
-    else {
-        it = std::min_element(map.begin(), map.end(),
-            [](int a, int b) {
-                return a < b;
-            });
 
-         qDebug() << "O";
-    }
-
-    return it.value();
+    toolBtnClicked(true);
+    lblClicked(row, col);
 }
 
 bool Widget::eventFilter(QObject *watched, QEvent *event)
@@ -486,22 +469,23 @@ void Widget::lblClicked(int row, int col)
 
 void Widget::restartGame()
 {
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            delete lblArr[i][j];
-        }
-    }
+//    for(int i = 0; i < 3; ++i) {
+//        for(int j = 0; j < 3; ++j) {
+//            delete lblArr[i][j];
+//        }
+//    }
 
-    result->hide();
+//    result->hide();
 
-    ui->msLbl->setText("Start game or select player");
+//    ui->msLbl->setText("Start game or select player");
 
-    ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
-    ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
+//    ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
+//    ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
 
-    isXTurn = true;
+//    isXTurn = true;
 
-    setLbl();
+//    setLbl();
 
-    blockToolBtnSignals();
+//    blockToolBtnSignals();
+    miniMax();
 }

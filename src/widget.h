@@ -40,7 +40,7 @@ private:
     int **getCurrentBoard();
     void restoreBoard(int **);
     void scoreVec(int);
-    int findBestScore(QMap<std::pair<int, int>, int> &);
+    void findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
