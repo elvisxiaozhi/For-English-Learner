@@ -282,18 +282,21 @@ void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
 {
     int row = vec[0].first.first;
     int col = vec[0].first.second;
+    int value = vec[0].second;
 
     for(int i = 0; i < vec.size() - 1; ++i) {
         if(isXTurn) {
-            if(vec[i].second < vec[i + 1].second) {
+            if(value < vec[i + 1].second) {
                 row = vec[i + 1].first.first;
                 col = vec[i + 1].first.second;
+                value = vec[i + 1].second;
             }
         }
         else {
-            if(vec[i].second > vec[i + 1].second) {
+            if(value > vec[i + 1].second) {
                 row = vec[i + 1].first.first;
                 col = vec[i + 1].first.second;
+                value = vec[i + 1].second;
             }
         }
     }
@@ -329,7 +332,7 @@ void Widget::toolBtnClicked(bool)
         isXTurn = true;
     }
 
-    computerTurn();
+//    computerTurn();
 }
 
 void Widget::lblClicked(int row, int col)
