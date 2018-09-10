@@ -22,6 +22,8 @@ Widget::Widget(QWidget *parent) :
 
     setWidgetLayout();
 
+    connect(ui->pushButton, &QPushButton::clicked, [this](){ miniMax(); });
+
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
 }
 
@@ -264,15 +266,16 @@ int Widget::search()
                 ++depth;
 
                 lblArr[i][j]->isCross = 2;
+                toolBtnClicked(true);
             }
         }
     }
 
     if(isXTurn) {
-        score -= depth;
+        score += depth;
     }
     else {
-        score += depth;
+        score -= depth;
     }
 
     return score;
@@ -375,23 +378,22 @@ void Widget::lblClicked(int row, int col)
 
 void Widget::restartGame()
 {
-//    for(int i = 0; i < 3; ++i) {
-//        for(int j = 0; j < 3; ++j) {
-//            delete lblArr[i][j];
-//        }
-//    }
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            delete lblArr[i][j];
+        }
+    }
 
-//    result->hide();
+    result->hide();
 
-//    ui->msLbl->setText("Start game or select player");
+    ui->msLbl->setText("Start game or select player");
 
-//    ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
-//    ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
+    ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
+    ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
 
-//    isXTurn = true;
+    isXTurn = true;
 
-//    setLbl();
+    setLbl();
 
-//    blockToolBtnSignals();
-    miniMax();
+    blockToolBtnSignals();
 }
