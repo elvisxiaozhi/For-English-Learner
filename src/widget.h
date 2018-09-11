@@ -5,14 +5,6 @@
 #include "chesslbl.h"
 #include "resultwidget.h"
 
-#define EASY 0
-#define MEDIUM 1
-#define IMPOSSIBLE 2
-#define PLAY_WITH_A_FRIEND 3
-#define XWON 10
-#define OWON -10
-#define DRAW 0
-
 namespace Ui {
 class Widget;
 }
@@ -31,6 +23,13 @@ private:
     ChessLbl **lblArr[3];
     bool isXTurn, isXTurnTemp;
     ResultWidget *result;
+    static const int easy;
+    static const int medium;
+    static const int impossible;
+    static const int playWithAFriend;
+    static const int xWon;
+    static const int oWon;
+    static const int draw;
 
     void setWidgetLayout();
     void setLbl();

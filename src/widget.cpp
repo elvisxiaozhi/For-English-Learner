@@ -4,6 +4,13 @@
 
 int Widget::crossWinningTimes = 0;
 int Widget::circleWinningTimes = 0;
+const int Widget::easy = 0;
+const int Widget::medium = 1;
+const int Widget::impossible = 2;
+const int Widget::playWithAFriend = 3;
+const int Widget::xWon = 10;
+const int Widget::oWon = -10;
+const int Widget::draw = 0;
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -43,7 +50,7 @@ void Widget::setWidgetLayout()
     ui->difficultyMode->addItem("Play against a friend");
 
     //set the default game mode to Medium;
-    ui->difficultyMode->setCurrentIndex(MEDIUM);
+    ui->difficultyMode->setCurrentIndex(medium);
 
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
@@ -171,14 +178,14 @@ void Widget::computerTurn()
 {
     if(checkWin() == 3) {
         switch (ui->difficultyMode->currentIndex()) {
-        case EASY:
+        case easy:
             easyMode();
             break;
-        case MEDIUM:
+        case medium:
             break;
-        case IMPOSSIBLE:
+        case impossible:
             break;
-        case PLAY_WITH_A_FRIEND:
+        case playWithAFriend:
             break;
         default:
             break;
@@ -243,13 +250,13 @@ void Widget::miniMax()
 int Widget::search()
 {
     if(checkWin() == 0) {
-        return OWON;
+        return oWon;
     }
     else if(checkWin() == 1) {
-        return XWON;
+        return xWon;
     }
     else if(checkWin() == 2) {
-        return DRAW;
+        return draw;
     }
 
     int depth = 0;
