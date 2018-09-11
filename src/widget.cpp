@@ -18,6 +18,7 @@ Widget::Widget(QWidget *parent) :
         lblArr[i] = new ChessLbl *[3];
     }
 
+    //install event filter to block signals from QComobox, so when the key is pressed, the index of QComobox will not change
     ui->difficultyMode->installEventFilter(this);
 
     setWidgetLayout();
@@ -41,7 +42,8 @@ void Widget::setWidgetLayout()
     ui->difficultyMode->addItem("Impossible");
     ui->difficultyMode->addItem("Play against a friend");
 
-    ui->difficultyMode->setCurrentIndex(1);
+    //set the default game mode to Medium;
+    ui->difficultyMode->setCurrentIndex(MEDIUM);
 
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
@@ -169,12 +171,15 @@ void Widget::computerTurn()
 {
     if(checkWin() == 3) {
         switch (ui->difficultyMode->currentIndex()) {
-        case 0:
+        case EASY:
             easyMode();
             break;
-//        case 1:
-//            easyMode();
-//            break;
+        case MEDIUM:
+            break;
+        case IMPOSSIBLE:
+            break;
+        case PLAY_WITH_A_FRIEND:
+            break;
         default:
             break;
         }
@@ -238,13 +243,13 @@ void Widget::miniMax()
 int Widget::search()
 {
     if(checkWin() == 0) {
-        return -10;
+        return OWON;
     }
     else if(checkWin() == 1) {
-        return 10;
+        return XWON;
     }
     else if(checkWin() == 2) {
-        return 0;
+        return DRAW;
     }
 
     int depth = 0;
@@ -334,8 +339,6 @@ void Widget::toolBtnClicked(bool)
 
         isXTurn = true;
     }
-
-//    computerTurn();
 }
 
 void Widget::lblClicked(int row, int col)

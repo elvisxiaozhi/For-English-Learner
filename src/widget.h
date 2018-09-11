@@ -5,6 +5,14 @@
 #include "chesslbl.h"
 #include "resultwidget.h"
 
+#define EASY 0
+#define MEDIUM 1
+#define IMPOSSIBLE 2
+#define PLAY_WITH_A_FRIEND 3
+#define XWON 10
+#define OWON -10
+#define DRAW 0
+
 namespace Ui {
 class Widget;
 }
