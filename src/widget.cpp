@@ -100,6 +100,7 @@ int Widget::checkWin()
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             if(lblArr[i][j]->isCross == ChessLbl::circle || lblArr[i][j]->isCross == ChessLbl::cross) {
+                //if isWinning(int) return true, which means circle or cross has won the game
                 if(isWinning(lblArr[i][j]->isCross)) {
                     return lblArr[i][j]->isCross;
                 }
@@ -120,20 +121,29 @@ bool Widget::isWinning(int isCross)
 {
     QVector<std::pair<int, int> > posVec;
 
+    //search the entire board and push back cross's or circle's coordinates(row and col) to posVec
     loop(3, 3, [this, &posVec, isCross](int i, int j){
         if(lblArr[i][j]->isCross == isCross) {
             posVec.push_back(std::make_pair(i, j));
         }
     });
 
+    //if posVec has more than three elements, which means those three elements can make cross or circle win the game
     if(posVec.size() >= 3) {
+        //search the posVec from the beginning to the last but three
         for(int i = 0; i < posVec.size() - 2; ++i) {
+            //search the posVec from the second one to the last but two
             for(int j = i + 1; j < posVec.size() - 1; ++j) {
+                //remember the first element and second element's coordinates difference
                 int rowDiff1 = posVec[i].first - posVec[j].first;
                 int colDiff1 = posVec[i].second - posVec[j].second;
+                //search the posVec from the third one to the last one
                 for(int k = j + 1; k < posVec.size(); ++k) {
+                    //remember the second element and third element's coordinates difference
                     int rowDiff2 = posVec[j].first - posVec[k].first;
                     int colDiff2 = posVec[j].second - posVec[k].second;
+                    //if the first element, second element and the third element's coordinates differences are the same,
+                    //which mean cross or circle has won the game, then return true
                     if(rowDiff1 == rowDiff2 && colDiff1 == colDiff2) {
                         return true;
                     }
@@ -145,26 +155,27 @@ bool Widget::isWinning(int isCross)
     return false;
 }
 
+//block tool btns signals and make it only "clickable" in some specific situations,
+//like in the beginning of the game, user likes to choose circle to play with computer
 void Widget::blockToolBtnSignals()
 {
+    //if the game mode if play with a friend, always block tool btns signals
     if(ui->difficultyMode->currentIndex() == playWithAFriend) {
         ui->cross->blockSignals(true);
         ui->circle->blockSignals(true);
     }
 
-    loop(3, 3, [this](int i, int j) {
-        if(lblArr[i][j]->isCross != ChessLbl::unfilled) {
-            if(isXTurn) {
-                ui->cross->blockSignals(true);
-                ui->circle->blockSignals(false);
-            }
-            else {
-                ui->cross->blockSignals(false);
-                ui->circle->blockSignals(true);
-            }
-            return;
-        }
-    });
+    //because the underline of tool btn needs to switch after each move,
+    //if it's cross turn, then cross tool btn signal is unblocked, so the underline can be drawn under cross btn signal
+    if(isXTurn) {
+        ui->cross->blockSignals(true);
+        ui->circle->blockSignals(false);
+    }
+    //vice versa
+    else {
+        ui->cross->blockSignals(false);
+        ui->circle->blockSignals(true);
+    }
 }
 
 void Widget::computerTurn()
