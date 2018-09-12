@@ -59,6 +59,8 @@ protected:
 private slots:
     void toolBtnClicked(bool);
     void lblClicked(int, int);
+    void putPiece(int, int);
+    void showGameOverResult();
     void restartGame();
 };
 

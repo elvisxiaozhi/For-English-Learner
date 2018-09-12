@@ -203,14 +203,7 @@ void Widget::easyMode()
         int row = rand() % 3;
         int col = rand() % 3;
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
-            if(isXTurn) {
-                lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
-                lblArr[row][col]->isCross = ChessLbl::cross;
-            }
-            else {
-                lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
-                lblArr[row][col]->isCross = ChessLbl::circle;
-            }
+            putPiece(row, col);
             break;
         }
     }
@@ -355,40 +348,54 @@ void Widget::toolBtnClicked(bool)
 
 void Widget::lblClicked(int row, int col)
 {
-    if(lblArr[row][col]->pixmap()->isNull() && checkWin() == notWin) {
-        if(isXTurn) {
-            lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
-            lblArr[row][col]->isCross = ChessLbl::cross;
+    if(checkWin() == notWin) {
+        if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
+            putPiece(row, col);
 
-            blockToolBtnSignals();
+            if(isXTurn) {
+                blockToolBtnSignals();
 
-            emit ui->circle->click();
+                emit ui->circle->click();
 
-            ui->msLbl->setText("O Turn");
+                ui->msLbl->setText("O Turn");
+            }
+            else {
+                blockToolBtnSignals();
 
-        }
-        else {
-            lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
-            lblArr[row][col]->isCross = ChessLbl::circle;
+                emit ui->cross->click();
 
-            blockToolBtnSignals();
-
-            emit ui->cross->click();
-
-            ui->msLbl->setText("X Turn");
+                ui->msLbl->setText("X Turn");
+            }
         }
 
         if(checkWin() != notWin) {
-            ui->msLbl->setText("Game Over");
-
-            result->show();
-            result->showResult(checkWin());
-
-            //put this after showResult(int);
-            ui->cross->setText(QString::number(crossWinningTimes));
-            ui->circle->setText(QString::number(circleWinningTimes));
+            showGameOverResult();
         }
     }
+}
+
+void Widget::putPiece(int row, int col)
+{
+    lblArr[row][col]->isCross = isXTurn;
+
+    if(isXTurn) {
+        lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
+    }
+    else {
+        lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
+    }
+}
+
+void Widget::showGameOverResult()
+{
+    ui->msLbl->setText("Game Over");
+
+    result->show();
+    result->showResult(checkWin());
+
+    //put this after showResult(int);
+    ui->cross->setText(QString::number(crossWinningTimes));
+    ui->circle->setText(QString::number(circleWinningTimes));
 }
 
 void Widget::restartGame()
