@@ -5,6 +5,15 @@
 #include "chesslbl.h"
 #include "resultwidget.h"
 
+template<typename FUNCTION>
+inline void loop(int row, int col, FUNCTION f) {
+    for(int i = 0; i < row; ++i) {
+        for(int j = 0; j < col; ++j) {
+            f(i, j);
+        }
+    }
+}
+
 namespace Ui {
 class Widget;
 }
@@ -17,19 +26,20 @@ public:
     explicit Widget(QWidget *parent = 0);
     ~Widget();
     static int crossWinningTimes, circleWinningTimes;
+    static constexpr int xWon = 1;
+    static constexpr int oWon = 0;
 
 private:
     Ui::Widget *ui;
     ChessLbl **lblArr[3];
     bool isXTurn, isXTurnTemp;
-    ResultWidget *result;
     static const int easy;
     static const int medium;
     static const int impossible;
     static const int playWithAFriend;
-    static const int xWon;
-    static const int oWon;
     static const int draw;
+    static const int notWin;
+    ResultWidget *result;
 
     void setWidgetLayout();
     void setLbl();

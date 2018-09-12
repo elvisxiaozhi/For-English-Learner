@@ -22,14 +22,13 @@ ResultWidget::~ResultWidget()
 void ResultWidget::showResult(int result)
 {
     switch (result) {
-    case 0:
+    case Widget::oWon:
         ui->cross->hide();
         ui->circle->show();
         ui->result->setText("WINNER!");
-
         ++Widget::circleWinningTimes;
         break;
-    case 1:
+    case Widget::xWon:
         ui->cross->show();
         ui->circle->hide();
         ui->result->setText("WINNER!");

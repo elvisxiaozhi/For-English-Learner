@@ -8,9 +8,8 @@ const int Widget::easy = 0;
 const int Widget::medium = 1;
 const int Widget::impossible = 2;
 const int Widget::playWithAFriend = 3;
-const int Widget::xWon = 10;
-const int Widget::oWon = -10;
-const int Widget::draw = 0;
+const int Widget::draw = 2;
+const int Widget::notWin = 3;
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -21,9 +20,7 @@ Widget::Widget(QWidget *parent) :
     isXTurn = true;
     isXTurnTemp = true;
 
-    for(int i = 0; i < 3; ++i) {
-        lblArr[i] = new ChessLbl *[3];
-    }
+    loop(3, 3, [this](int i, int){ lblArr[i] = new ChessLbl *[3]; });
 
     //install event filter to block signals from QComobox, so when the key is pressed, the index of QComobox will not change
     ui->difficultyMode->installEventFilter(this);
@@ -84,22 +81,21 @@ void Widget::setWidgetLayout()
 
 void Widget::setLbl()
 {
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            ChessLbl *lbl = new ChessLbl(ui->chessboard, i, j);
+    loop(3, 3, [this](int i, int j){
+        ChessLbl *lbl = new ChessLbl(ui->chessboard, i, j);
 
-            lblArr[i][j] = lbl;
+        lblArr[i][j] = lbl;
 
-            ui->gridLayout->addWidget(lbl, i, j);
+        ui->gridLayout->addWidget(lbl, i, j);
 
-            connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
-        }
-    }
+        connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
+    });
 }
 
 int Widget::checkWin()
 {
     int filledSpace = 0;
+    static const int allFilled = 9;
 
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
@@ -113,23 +109,22 @@ int Widget::checkWin()
         }
     }
 
-    if(filledSpace == 9) {
-        return 2;
+    if(filledSpace == allFilled) {
+        return draw;
     }
 
-    return 3;
+    return notWin;
 }
 
 bool Widget::isWinning(int isCross)
 {
     QVector<std::pair<int, int> > posVec;
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == isCross) {
-                posVec.push_back(std::make_pair(i, j));
-            }
+
+    loop(3, 3, [this, &posVec, isCross](int i, int j){
+        if(lblArr[i][j]->isCross == isCross) {
+            posVec.push_back(std::make_pair(i, j));
         }
-    }
+    });
 
     if(posVec.size() >= 3) {
         for(int i = 0; i < posVec.size() - 2; ++i) {
@@ -157,26 +152,24 @@ void Widget::blockToolBtnSignals()
         ui->circle->blockSignals(true);
     }
 
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross != 2) {
-                if(isXTurn) {
-                    ui->cross->blockSignals(true);
-                    ui->circle->blockSignals(false);
-                }
-                else {
-                    ui->cross->blockSignals(false);
-                    ui->circle->blockSignals(true);
-                }
-                return;
+    loop(3, 3, [this](int i, int j) {
+        if(lblArr[i][j]->isCross != 2) {
+            if(isXTurn) {
+                ui->cross->blockSignals(true);
+                ui->circle->blockSignals(false);
             }
+            else {
+                ui->cross->blockSignals(false);
+                ui->circle->blockSignals(true);
+            }
+            return;
         }
-    }
+    });
 }
 
 void Widget::computerTurn()
 {
-    if(checkWin() == 3) {
+    if(checkWin() == notWin) {
         switch (ui->difficultyMode->currentIndex()) {
         case easy:
             easyMode();
@@ -215,13 +208,12 @@ void Widget::easyMode()
 QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
 {
     QVector<std::pair<std::pair<int, int>, int > > scoreVec;
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == 2) {
-                scoreVec.push_back(std::make_pair(std::make_pair(i, j), 0));
-            }
+
+    loop(3, 3, [this, &scoreVec](int i, int j){
+        if(lblArr[i][j]->isCross == 2) {
+            scoreVec.push_back(std::make_pair(std::make_pair(i, j), 0));
         }
-    }
+    });
 
     return scoreVec;
 }
@@ -249,39 +241,40 @@ void Widget::miniMax()
 
 int Widget::search()
 {
-    if(checkWin() == 0) {
-        return oWon;
+    if(checkWin() == oWon) {
+        static const int oWonScore = -10;
+        return oWonScore;
     }
-    else if(checkWin() == 1) {
-        return xWon;
+    else if(checkWin() == xWon) {
+        static const int xWonScore = 10;
+        return xWonScore;
     }
-    else if(checkWin() == 2) {
-        return draw;
+    else if(checkWin() == draw) {
+        static const int drawScore = 0;
+        return drawScore;
     }
 
     int depth = 0;
     int score = 0;
 
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == 2) {
-                toolBtnClicked(true);
-                lblArr[i][j]->isCross = isXTurn;
+    loop(3, 3, [&](int i, int j){
+        if(lblArr[i][j]->isCross == 2) {
+            toolBtnClicked(true);
+            lblArr[i][j]->isCross = isXTurn;
 
-                if(isXTurn) {
-                    score = std::max(score, search());
-                }
-                else {
-                    score = std::min(score, search());
-                }
-
-                ++depth;
-
-                lblArr[i][j]->isCross = 2;
-                toolBtnClicked(true);
+            if(isXTurn) {
+                score = std::max(score, search());
             }
+            else {
+                score = std::min(score, search());
+            }
+
+            ++depth;
+
+            lblArr[i][j]->isCross = 2;
+            toolBtnClicked(true);
         }
-    }
+    });
 
     if(isXTurn) {
         score += depth;
@@ -388,11 +381,7 @@ void Widget::lblClicked(int row, int col)
 
 void Widget::restartGame()
 {
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            delete lblArr[i][j];
-        }
-    }
+    loop(3, 3, [this](int i, int j){ delete lblArr[i][j]; });
 
     result->hide();
 
