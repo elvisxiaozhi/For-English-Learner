@@ -10,6 +10,9 @@ class ChessLbl : public QLabel
     Q_OBJECT
 public:
     ChessLbl(QWidget *parent = nullptr, int row = 0, int col = 0);
+    static const int circle;
+    static const int cross;
+    static const int unfilled;
     int isCross;
 
 private:

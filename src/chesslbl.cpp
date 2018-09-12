@@ -1,7 +1,11 @@
 #include "chesslbl.h"
 #include <QMouseEvent>
 
-ChessLbl::ChessLbl(QWidget *parent, int row, int col) : QLabel(parent), isCross(2)
+const int ChessLbl::circle = 0;
+const int ChessLbl::cross = 1;
+const int ChessLbl::unfilled = 2;
+
+ChessLbl::ChessLbl(QWidget *parent, int row, int col) : QLabel(parent), isCross(unfilled)
 {
     this->row = row;
     this->col = col;

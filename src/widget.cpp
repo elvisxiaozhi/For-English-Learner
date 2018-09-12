@@ -99,7 +99,7 @@ int Widget::checkWin()
 
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == 0 || lblArr[i][j]->isCross == 1) {
+            if(lblArr[i][j]->isCross == ChessLbl::circle || lblArr[i][j]->isCross == ChessLbl::cross) {
                 if(isWinning(lblArr[i][j]->isCross)) {
                     return lblArr[i][j]->isCross;
                 }
@@ -147,13 +147,13 @@ bool Widget::isWinning(int isCross)
 
 void Widget::blockToolBtnSignals()
 {
-    if(ui->difficultyMode->currentIndex() == 3) {
+    if(ui->difficultyMode->currentIndex() == playWithAFriend) {
         ui->cross->blockSignals(true);
         ui->circle->blockSignals(true);
     }
 
     loop(3, 3, [this](int i, int j) {
-        if(lblArr[i][j]->isCross != 2) {
+        if(lblArr[i][j]->isCross != ChessLbl::unfilled) {
             if(isXTurn) {
                 ui->cross->blockSignals(true);
                 ui->circle->blockSignals(false);
@@ -191,14 +191,14 @@ void Widget::easyMode()
     while(true) {
         int row = rand() % 3;
         int col = rand() % 3;
-        if(lblArr[row][col]->isCross == 2) {
+        if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
             if(isXTurn) {
                 lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
-                lblArr[row][col]->isCross = 1;
+                lblArr[row][col]->isCross = ChessLbl::cross;
             }
             else {
                 lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
-                lblArr[row][col]->isCross = 0;
+                lblArr[row][col]->isCross = ChessLbl::circle;
             }
             break;
         }
@@ -210,7 +210,7 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
     QVector<std::pair<std::pair<int, int>, int > > scoreVec;
 
     loop(3, 3, [this, &scoreVec](int i, int j){
-        if(lblArr[i][j]->isCross == 2) {
+        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
             scoreVec.push_back(std::make_pair(std::make_pair(i, j), 0));
         }
     });
@@ -230,7 +230,7 @@ void Widget::miniMax()
 
         score[i].second = search();
 
-        lblArr[score[i].first.first][score[i].first.second]->isCross = 2;
+        lblArr[score[i].first.first][score[i].first.second]->isCross = ChessLbl::unfilled;
         isXTurn = isXTurnTemp;
     }
 
@@ -258,7 +258,7 @@ int Widget::search()
     int score = 0;
 
     loop(3, 3, [&](int i, int j){
-        if(lblArr[i][j]->isCross == 2) {
+        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
             toolBtnClicked(true);
             lblArr[i][j]->isCross = isXTurn;
 
@@ -271,7 +271,7 @@ int Widget::search()
 
             ++depth;
 
-            lblArr[i][j]->isCross = 2;
+            lblArr[i][j]->isCross = ChessLbl::unfilled;
             toolBtnClicked(true);
         }
     });
@@ -312,6 +312,7 @@ void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
     lblClicked(row, col);
 }
 
+//block QComobox signals
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
     if(ui->difficultyMode) {
@@ -343,10 +344,10 @@ void Widget::toolBtnClicked(bool)
 
 void Widget::lblClicked(int row, int col)
 {
-    if(lblArr[row][col]->pixmap()->isNull() && checkWin() == 3) {
+    if(lblArr[row][col]->pixmap()->isNull() && checkWin() == notWin) {
         if(isXTurn) {
             lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
-            lblArr[row][col]->isCross = 1;
+            lblArr[row][col]->isCross = ChessLbl::cross;
 
             blockToolBtnSignals();
 
@@ -357,7 +358,7 @@ void Widget::lblClicked(int row, int col)
         }
         else {
             lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
-            lblArr[row][col]->isCross = 0;
+            lblArr[row][col]->isCross = ChessLbl::circle;
 
             blockToolBtnSignals();
 
@@ -366,7 +367,7 @@ void Widget::lblClicked(int row, int col)
             ui->msLbl->setText("X Turn");
         }
 
-        if(checkWin() != 3) {
+        if(checkWin() != notWin) {
             ui->msLbl->setText("Game Over");
 
             result->show();
