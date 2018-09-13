@@ -60,7 +60,6 @@ private slots:
     void toolBtnClicked(bool);
     void lblClicked(int, int);
     void putPiece(int, int);
-    void putTestingPiece(int, int);
     void showGameOverResult();
     void restartGame();
 };

@@ -255,7 +255,6 @@ int Widget::search()
         return drawScore;
     }
 
-    int depth = 0;
     int score = 0;
 
     loop(3, 3, [&](int i, int j){
@@ -270,20 +269,10 @@ int Widget::search()
                 score = std::min(score, search());
             }
 
-            ++depth;
-
             lblArr[i][j]->isCross = ChessLbl::unfilled;
             toolBtnClicked(true);
         }
     });
-
-    qDebug() << isXTurn << depth;
-    if(isXTurn) {
-        score += depth;
-    }
-    else {
-        score -= depth;
-    }
 
     return score;
 }
@@ -375,23 +364,6 @@ void Widget::putPiece(int row, int col)
         emit ui->cross->click();
 
         ui->msLbl->setText("X Turn");
-    }
-}
-
-void Widget::putTestingPiece(int row, int col)
-{
-    lblArr[row][col]->isCross = isXTurn;
-    blockToolBtnSignals();
-
-    if(isXTurn) {
-        emit ui->circle->click();
-
-//        ui->msLbl->setText("O Turn");
-    }
-    else {
-        emit ui->cross->click();
-
-//        ui->msLbl->setText("X Turn");
     }
 }
 
