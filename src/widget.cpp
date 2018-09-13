@@ -18,7 +18,6 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
 
     isXTurn = true;
-    isXTurnTemp = true;
 
     loop(3, 3, [this](int i, int){ lblArr[i] = new ChessLbl *[3]; });
 
@@ -224,19 +223,16 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
 
 void Widget::miniMax()
 {
-    isXTurnTemp = isXTurn;
-
     QVector<std::pair<std::pair<int, int>, int > > score = getAvaiablePlaces();
 
     for(int i = 0; i < score.size(); ++i) {
-//        lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
-//        toolBtnClicked(true);
-        putTestingPiece(score[i].first.first, score[i].first.second);
+        lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
+        toolBtnClicked(true);
 
         score[i].second = search();
 
         lblArr[score[i].first.first][score[i].first.second]->isCross = ChessLbl::unfilled;
-        isXTurn = isXTurnTemp;
+        toolBtnClicked(true);
     }
 
     qDebug() << score << isXTurn;
@@ -264,10 +260,8 @@ int Widget::search()
 
     loop(3, 3, [&](int i, int j){
         if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-//            toolBtnClicked(true);
-//            lblArr[i][j]->isCross = isXTurn;
-            bool isTempXTurn = isXTurn;
-            putTestingPiece(i, j);
+            lblArr[i][j]->isCross = isXTurn;
+            toolBtnClicked(true);
 
             if(isXTurn) {
                 score = std::max(score, search());
@@ -279,8 +273,7 @@ int Widget::search()
             ++depth;
 
             lblArr[i][j]->isCross = ChessLbl::unfilled;
-//            toolBtnClicked(true);
-            isXTurn = isTempXTurn;
+            toolBtnClicked(true);
         }
     });
 

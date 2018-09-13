@@ -32,7 +32,7 @@ public:
 private:
     Ui::Widget *ui;
     ChessLbl **lblArr[3];
-    bool isXTurn, isXTurnTemp;
+    bool isXTurn;
     static const int easy;
     static const int medium;
     static const int impossible;
