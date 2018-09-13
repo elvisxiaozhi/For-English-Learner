@@ -229,8 +229,9 @@ void Widget::miniMax()
     QVector<std::pair<std::pair<int, int>, int > > score = getAvaiablePlaces();
 
     for(int i = 0; i < score.size(); ++i) {
-        lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
-        toolBtnClicked(true);
+//        lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
+//        toolBtnClicked(true);
+        putTestingPiece(score[i].first.first, score[i].first.second);
 
         score[i].second = search();
 
@@ -263,8 +264,10 @@ int Widget::search()
 
     loop(3, 3, [&](int i, int j){
         if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-            toolBtnClicked(true);
-            lblArr[i][j]->isCross = isXTurn;
+//            toolBtnClicked(true);
+//            lblArr[i][j]->isCross = isXTurn;
+            bool isTempXTurn = isXTurn;
+            putTestingPiece(i, j);
 
             if(isXTurn) {
                 score = std::max(score, search());
@@ -276,10 +279,12 @@ int Widget::search()
             ++depth;
 
             lblArr[i][j]->isCross = ChessLbl::unfilled;
-            toolBtnClicked(true);
+//            toolBtnClicked(true);
+            isXTurn = isTempXTurn;
         }
     });
 
+    qDebug() << isXTurn << depth;
     if(isXTurn) {
         score += depth;
     }
@@ -351,21 +356,6 @@ void Widget::lblClicked(int row, int col)
     if(checkWin() == notWin) {
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
             putPiece(row, col);
-
-            if(isXTurn) {
-                blockToolBtnSignals();
-
-                emit ui->circle->click();
-
-                ui->msLbl->setText("O Turn");
-            }
-            else {
-                blockToolBtnSignals();
-
-                emit ui->cross->click();
-
-                ui->msLbl->setText("X Turn");
-            }
         }
 
         if(checkWin() != notWin) {
@@ -377,12 +367,38 @@ void Widget::lblClicked(int row, int col)
 void Widget::putPiece(int row, int col)
 {
     lblArr[row][col]->isCross = isXTurn;
+    blockToolBtnSignals();
 
     if(isXTurn) {
         lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
+
+        emit ui->circle->click();
+
+        ui->msLbl->setText("O Turn");
     }
     else {
         lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
+
+        emit ui->cross->click();
+
+        ui->msLbl->setText("X Turn");
+    }
+}
+
+void Widget::putTestingPiece(int row, int col)
+{
+    lblArr[row][col]->isCross = isXTurn;
+    blockToolBtnSignals();
+
+    if(isXTurn) {
+        emit ui->circle->click();
+
+//        ui->msLbl->setText("O Turn");
+    }
+    else {
+        emit ui->cross->click();
+
+//        ui->msLbl->setText("X Turn");
     }
 }
 
