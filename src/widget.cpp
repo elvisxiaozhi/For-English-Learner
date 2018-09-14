@@ -26,7 +26,11 @@ Widget::Widget(QWidget *parent) :
 
     setWidgetLayout();
 
-    connect(ui->pushButton, &QPushButton::clicked, [this](){ miniMax(); });
+    connect(ui->pushButton, &QPushButton::clicked, [this](){
+        QVector<std::pair<std::pair<int, int>, int > > score = miniMax();
+        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
+        lblClicked(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+    });
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
 }
@@ -221,63 +225,46 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
     return scoreVec;
 }
 
-void Widget::miniMax()
+QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax()
 {
-    QVector<std::pair<std::pair<int, int>, int > > score = getAvaiablePlaces();
+    QVector<std::pair<std::pair<int, int>, int > > scores = getAvaiablePlaces();
 
-    for(int i = 0; i < score.size(); ++i) {
-        lblArr[score[i].first.first][score[i].first.second]->isCross = isXTurn;
+    for(int i = 0; i < scores.size(); ++i) {
+        lblArr[scores[i].first.first][scores[i].first.second]->isCross = isXTurn;
         toolBtnClicked(true);
 
-        score[i].second = search();
-
-        lblArr[score[i].first.first][score[i].first.second]->isCross = ChessLbl::unfilled;
-        toolBtnClicked(true);
-    }
-
-    qDebug() << score << isXTurn;
-
-    findBestMove(score);
-}
-
-int Widget::search()
-{
-    if(checkWin() == oWon) {
-        static const int oWonScore = -10;
-        return oWonScore;
-    }
-    else if(checkWin() == xWon) {
-        static const int xWonScore = 10;
-        return xWonScore;
-    }
-    else if(checkWin() == draw) {
-        static const int drawScore = 0;
-        return drawScore;
-    }
-
-    int score = 0;
-
-    loop(3, 3, [&](int i, int j){
-        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-            lblArr[i][j]->isCross = isXTurn;
-            toolBtnClicked(true);
-
+        if(checkWin() == oWon) {
+            static const int oWonScore = -10;
+            scores[i].second = oWonScore;
+        }
+        else if(checkWin() == xWon) {
+            static const int xWonScore = 10;
+            scores[i].second = xWonScore;
+        }
+        else if(checkWin() == draw) {
+            static const int drawScore = 0;
+            scores[i].second = drawScore;
+        }
+        else {
+            int steps = 1;
+            QVector<std::pair<std::pair<int, int>, int > > score = miniMax();
+            ++steps;
             if(isXTurn) {
-                score = std::max(score, search());
+                scores[i].second = std::get<2>(findBestMove(score)) - steps;
             }
             else {
-                score = std::min(score, search());
+                scores[i].second = std::get<2>(findBestMove(score)) + steps;
             }
-
-            lblArr[i][j]->isCross = ChessLbl::unfilled;
-            toolBtnClicked(true);
         }
-    });
 
-    return score;
+        lblArr[scores[i].first.first][scores[i].first.second]->isCross = ChessLbl::unfilled;
+        toolBtnClicked(true);
+    }
+
+    return scores;
 }
 
-void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
+std::tuple<int, int, int> Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
 {
     int row = vec[0].first.first;
     int col = vec[0].first.second;
@@ -300,7 +287,8 @@ void Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
         }
     }
 
-    lblClicked(row, col);
+
+    return std::make_tuple(row, col, value);
 }
 
 //block QComobox signals
