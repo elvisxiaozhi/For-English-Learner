@@ -27,7 +27,7 @@ Widget::Widget(QWidget *parent) :
     setWidgetLayout();
 
     connect(ui->pushButton, &QPushButton::clicked, [this](){
-        QVector<std::pair<std::pair<int, int>, int > > score = miniMax();
+        QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
         qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
         lblClicked(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
     });
@@ -225,13 +225,15 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
     return scoreVec;
 }
 
-QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax()
+QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax(int depth)
 {
     QVector<std::pair<std::pair<int, int>, int > > scores = getAvaiablePlaces();
 
     for(int i = 0; i < scores.size(); ++i) {
         lblArr[scores[i].first.first][scores[i].first.second]->isCross = isXTurn;
         toolBtnClicked(true);
+
+        int steps = depth;
 
         if(checkWin() == oWon) {
             static const int oWonScore = -10;
@@ -246,19 +248,17 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax()
             scores[i].second = drawScore;
         }
         else {
-            int steps = 1;
-            QVector<std::pair<std::pair<int, int>, int > > score = miniMax();
             ++steps;
-            if(isXTurn) {
-                scores[i].second = std::get<2>(findBestMove(score)) - steps;
-            }
-            else {
-                scores[i].second = std::get<2>(findBestMove(score)) + steps;
-            }
+            QVector<std::pair<std::pair<int, int>, int > > score = miniMax(steps);
+            scores[i].second = std::get<2>(findBestMove(score));
         }
 
         lblArr[scores[i].first.first][scores[i].first.second]->isCross = ChessLbl::unfilled;
         toolBtnClicked(true);
+
+        qDebug() << isXTurn << scores;
+
+        steps = depth;
     }
 
     return scores;
@@ -291,6 +291,18 @@ std::tuple<int, int, int> Widget::findBestMove(QVector<std::pair<std::pair<int, 
     return std::make_tuple(row, col, value);
 }
 
+int Widget::returnUnfilledPieces()
+{
+    int unfilledPieces = 0;
+    loop(3, 3, [this, &unfilledPieces](int i, int j){
+        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+            ++unfilledPieces;
+        }
+    });
+
+    return unfilledPieces;
+}
+
 //block QComobox signals
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
@@ -319,6 +331,8 @@ void Widget::toolBtnClicked(bool)
 
         isXTurn = true;
     }
+
+    qDebug() << returnUnfilledPieces();
 }
 
 void Widget::lblClicked(int row, int col)

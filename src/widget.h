@@ -49,9 +49,10 @@ private:
     void computerTurn();
     void easyMode();
     QVector<std::pair<std::pair<int, int>, int > > getAvaiablePlaces();
-    QVector<std::pair<std::pair<int, int>, int > > miniMax();
+    QVector<std::pair<std::pair<int, int>, int > > miniMax(int);
     int search();
     std::tuple<int, int, int> findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
+    int returnUnfilledPieces();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
