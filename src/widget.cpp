@@ -153,7 +153,7 @@ bool Widget::isWinning(int isCross)
 }
 
 //block tool btns signals and make it only "clickable" in some specific situations,
-//like in the beginning of the game, user likes to choose circle to play with computer
+//like in the beginning of the game, user would like to choose circle to play with computer
 void Widget::blockToolBtnSignals()
 {
     //if the game mode if play with a friend, always block tool btns signals
@@ -161,10 +161,9 @@ void Widget::blockToolBtnSignals()
         ui->cross->blockSignals(true);
         ui->circle->blockSignals(true);
     }
-
     //because the underline of tool btn needs to switch after each move,
     //if it's cross turn, then cross tool btn signal is unblocked, so the underline can be drawn under cross btn signal
-    if(isXTurn) {
+    else if(isXTurn) { //note it's "else if"
         ui->cross->blockSignals(true);
         ui->circle->blockSignals(false);
     }
@@ -182,15 +181,20 @@ void Widget::computerTurn()
         easyMode();
         break;
     case medium: {
-        QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
-//        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
-        putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+        bool useMinimax = rand() % 2;
+        if(useMinimax) {
+            QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
+            putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+        }
+        else {
+            easyMode();
+        }
         break;
     }
     case impossible: {
         QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
-//        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
         putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+        //        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
         break;
     }
     default:
