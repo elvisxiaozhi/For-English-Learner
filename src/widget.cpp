@@ -206,7 +206,7 @@ void Widget::easyMode()
         int row = rand() % 3;
         int col = rand() % 3;
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
-            putPiece(row, col);
+            lblClicked(row, col);
             break;
         }
     }
@@ -233,8 +233,6 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax(int depth)
         lblArr[scores[i].first.first][scores[i].first.second]->isCross = isXTurn;
         toolBtnClicked(true);
 
-        int steps = depth;
-
         if(checkWin() == oWon) {
             static const int oWonScore = -10;
             scores[i].second = oWonScore;
@@ -248,17 +246,19 @@ QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax(int depth)
             scores[i].second = drawScore;
         }
         else {
-            ++steps;
-            QVector<std::pair<std::pair<int, int>, int > > score = miniMax(steps);
+            QVector<std::pair<std::pair<int, int>, int > > score = miniMax(depth + 1);
             scores[i].second = std::get<2>(findBestMove(score));
         }
 
         lblArr[scores[i].first.first][scores[i].first.second]->isCross = ChessLbl::unfilled;
         toolBtnClicked(true);
 
-        qDebug() << isXTurn << scores;
-
-        steps = depth;
+        if(isXTurn) {
+            scores[i].second -= depth;
+        }
+        else {
+            scores[i].second += depth;
+        }
     }
 
     return scores;
@@ -303,6 +303,14 @@ int Widget::returnUnfilledPieces()
     return unfilledPieces;
 }
 
+void Widget::makeRandomMove()
+{
+    int row = rand() % 3;
+    int col = rand() % 3;
+
+    lblClicked(row, col);
+}
+
 //block QComobox signals
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
@@ -332,7 +340,16 @@ void Widget::toolBtnClicked(bool)
         isXTurn = true;
     }
 
-    qDebug() << returnUnfilledPieces();
+    if(ui->difficultyMode->currentIndex() == easy) {
+        if(returnUnfilledPieces() == 9) {
+            easyMode();
+        }
+    }
+    else if(ui->difficultyMode->currentIndex() == medium || ui->difficultyMode->currentIndex() == impossible) {
+        if(returnUnfilledPieces() == 9) {
+            makeRandomMove();
+        }
+    }
 }
 
 void Widget::lblClicked(int row, int col)
