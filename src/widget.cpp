@@ -26,12 +26,6 @@ Widget::Widget(QWidget *parent) :
 
     setWidgetLayout();
 
-    connect(ui->pushButton, &QPushButton::clicked, [this](){
-        QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
-        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
-        lblClicked(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
-    });
-
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
 }
 
@@ -183,17 +177,28 @@ void Widget::blockToolBtnSignals()
 
 void Widget::computerTurn()
 {
-    if(checkWin() == notWin) {
-        switch (ui->difficultyMode->currentIndex()) {
-        case easy:
-            break;
-        case medium:
-            break;
-        case impossible:
-            break;
-        default:
-            break;
-        }
+    switch (ui->difficultyMode->currentIndex()) {
+    case easy:
+        easyMode();
+        break;
+    case medium: {
+        QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
+//        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
+        putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+        break;
+    }
+    case impossible: {
+        QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
+//        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
+        putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+        break;
+    }
+    default:
+        break;
+    }
+
+    if(checkWin() != notWin) {
+        showGameOverResult();
     }
 }
 
@@ -351,7 +356,13 @@ void Widget::lblClicked(int row, int col)
             showGameOverResult();
         }
         else if(ui->difficultyMode->currentIndex() != playWithAFriend) {
-            easyMode();
+            if(returnUnfilledPieces() >= 8) {
+                easyMode();
+            }
+            else {
+                computerTurn();
+            }
+
             toolBtnClicked(true); //do not delete this line, it's important here
         }
     }
