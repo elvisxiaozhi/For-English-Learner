@@ -186,13 +186,10 @@ void Widget::computerTurn()
     if(checkWin() == notWin) {
         switch (ui->difficultyMode->currentIndex()) {
         case easy:
-            easyMode();
             break;
         case medium:
             break;
         case impossible:
-            break;
-        case playWithAFriend:
             break;
         default:
             break;
@@ -206,7 +203,12 @@ void Widget::easyMode()
         int row = rand() % 3;
         int col = rand() % 3;
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
-            lblClicked(row, col);
+            putPiece(row, col);
+
+            if(checkWin() != notWin) {
+                showGameOverResult();
+            }
+
             break;
         }
     }
@@ -303,14 +305,6 @@ int Widget::returnUnfilledPieces()
     return unfilledPieces;
 }
 
-void Widget::makeRandomMove()
-{
-    int row = rand() % 3;
-    int col = rand() % 3;
-
-    lblClicked(row, col);
-}
-
 //block QComobox signals
 bool Widget::eventFilter(QObject *watched, QEvent *event)
 {
@@ -327,6 +321,10 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
 
 void Widget::toolBtnClicked(bool)
 {
+    if(returnUnfilledPieces() == 9) {
+        easyMode();
+    }
+
     if(isXTurn) {
         ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid white; }");
         ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid #00cccc; }");
@@ -339,17 +337,6 @@ void Widget::toolBtnClicked(bool)
 
         isXTurn = true;
     }
-
-    if(ui->difficultyMode->currentIndex() == easy) {
-        if(returnUnfilledPieces() == 9) {
-            easyMode();
-        }
-    }
-    else if(ui->difficultyMode->currentIndex() == medium || ui->difficultyMode->currentIndex() == impossible) {
-        if(returnUnfilledPieces() == 9) {
-            makeRandomMove();
-        }
-    }
 }
 
 void Widget::lblClicked(int row, int col)
@@ -357,10 +344,15 @@ void Widget::lblClicked(int row, int col)
     if(checkWin() == notWin) {
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
             putPiece(row, col);
+            toolBtnClicked(true);
         }
 
         if(checkWin() != notWin) {
             showGameOverResult();
+        }
+        else if(ui->difficultyMode->currentIndex() != playWithAFriend) {
+            easyMode();
+            toolBtnClicked(true); //do not delete this line, it's important here
         }
     }
 }
@@ -373,14 +365,10 @@ void Widget::putPiece(int row, int col)
     if(isXTurn) {
         lblArr[row][col]->setPixmap(QPixmap(":/icons/cross.png"));
 
-        emit ui->circle->click();
-
         ui->msLbl->setText("O Turn");
     }
     else {
         lblArr[row][col]->setPixmap(QPixmap(":/icons/circle.png"));
-
-        emit ui->cross->click();
 
         ui->msLbl->setText("X Turn");
     }
