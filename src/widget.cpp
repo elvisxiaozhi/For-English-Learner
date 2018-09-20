@@ -91,6 +91,11 @@ void Widget::setLbl()
 
 int Widget::checkWin()
 {
+    if(returnUnfilledPieces() == 0) {
+        return draw;
+    }
+
+    //I tried to refactor this by using the loop template, but it seemed like to me below is the best way.
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             if(lblArr[i][j]->isCross == ChessLbl::circle || lblArr[i][j]->isCross == ChessLbl::cross) {
@@ -102,13 +107,10 @@ int Widget::checkWin()
         }
     }
 
-    if(returnUnfilledPieces() == 0) {
-        return draw;
-    }
-
     return notWin;
 }
 
+//general who is winning function
 bool Widget::isWinning(int isCross)
 {
     QVector<std::pair<int, int> > posVec;
