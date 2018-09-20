@@ -350,6 +350,7 @@ void Widget::toolBtnClicked(bool)
 
 void Widget::lblClicked(int row, int col)
 {
+//    qDebug() << lblArr[row][col]->cl;
     if(checkWin() == notWin) {
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
             putPiece(row, col);
@@ -375,6 +376,8 @@ void Widget::lblClicked(int row, int col)
 void Widget::putPiece(int row, int col)
 {
     lblArr[row][col]->isCross = isXTurn;
+    //block clciked piece(label) signal to prevent triggering lblClicked(int, int) function if users accidentally clicked filled piece(label)
+    lblArr[row][col]->blockSignals(true);
     blockToolBtnSignals();
 
     if(isXTurn) {
