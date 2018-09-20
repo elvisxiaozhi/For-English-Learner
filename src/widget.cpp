@@ -91,9 +91,6 @@ void Widget::setLbl()
 
 int Widget::checkWin()
 {
-    int filledSpace = 0;
-    static const int allFilled = 9;
-
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             if(lblArr[i][j]->isCross == ChessLbl::circle || lblArr[i][j]->isCross == ChessLbl::cross) {
@@ -101,13 +98,11 @@ int Widget::checkWin()
                 if(isWinning(lblArr[i][j]->isCross)) {
                     return lblArr[i][j]->isCross;
                 }
-
-                ++filledSpace;
             }
         }
     }
 
-    if(filledSpace == allFilled) {
+    if(returnUnfilledPieces() == 0) {
         return draw;
     }
 
