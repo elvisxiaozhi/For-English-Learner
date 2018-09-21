@@ -110,7 +110,7 @@ int Widget::checkWin()
     return notWin;
 }
 
-//general who is winning function
+//generic function to check who is winning
 bool Widget::isWinning(int isCross)
 {
     QVector<std::pair<int, int> > posVec;
