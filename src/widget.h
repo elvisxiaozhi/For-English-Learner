@@ -53,6 +53,9 @@ private:
     int search();
     std::tuple<int, int, int> findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
     int returnUnfilledPieces();
+    void miniMax();
+    int maxSearch(int);
+    int minSearch(int);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);

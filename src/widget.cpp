@@ -27,6 +27,8 @@ Widget::Widget(QWidget *parent) :
     setWidgetLayout();
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
+
+    connect(ui->pushButton, &QPushButton::clicked, [this](){ miniMax(); });
 }
 
 Widget::~Widget()
@@ -44,7 +46,7 @@ void Widget::setWidgetLayout()
     ui->difficultyMode->addItem("Play against a friend");
 
     //set the default game mode to Medium;
-    ui->difficultyMode->setCurrentIndex(medium);
+    ui->difficultyMode->setCurrentIndex(playWithAFriend);
 
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
@@ -309,6 +311,113 @@ int Widget::returnUnfilledPieces()
     });
 
     return unfilledPieces;
+}
+
+void Widget::miniMax()
+{
+    int score = 0;
+    if(isXTurn) {
+        score = -100;
+    }
+    else {
+        score = 100;
+    }
+    int row = 0;
+    int col = 0;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+                if(isXTurn) {
+                    lblArr[i][j]->isCross = ChessLbl::cross;
+
+                    int tempScore = maxSearch(0);
+
+                    if(tempScore > score) {
+                        score = tempScore;
+                        row = i;
+                        col = j;
+                    }
+                }
+                else {
+                    lblArr[i][j]->isCross = ChessLbl::circle;
+
+                    int tempScore = minSearch(0);
+
+                    if(tempScore < score) {
+                        score = tempScore;
+                        row = i;
+                        col = j;
+                    }
+                }
+
+                lblArr[i][j]->isCross = ChessLbl::unfilled;
+            }
+        }
+    }
+
+    lblClicked(row, col);
+}
+
+int Widget::maxSearch(int depth)
+{
+    if(checkWin() == xWon) {
+        qDebug() << "X won" << 10 + depth;
+        return 10 + depth;
+    }
+    if(checkWin() == oWon) {
+        qDebug() << "O won" << -10 + depth;
+        return -10 + depth;
+    }
+    if(checkWin() == draw) {
+        qDebug() << "draw" << depth;
+        return 0 + depth;
+    }
+
+    int score = -100;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+                lblArr[i][j]->isCross = ChessLbl::cross;
+
+                score = std::max(score, minSearch(depth + 1));
+
+                lblArr[i][j]->isCross = ChessLbl::unfilled;
+            }
+        }
+    }
+
+    return score + depth;
+}
+
+int Widget::minSearch(int depth)
+{
+    if(checkWin() == xWon) {
+        return 10 - depth;
+    }
+    if(checkWin() == oWon) {
+        return -10 - depth;
+    }
+    if(checkWin() == draw) {
+        return 0 - depth;
+    }
+
+    int score = 100;
+
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+                lblArr[i][j]->isCross = ChessLbl::circle;
+
+                score = std::min(score, maxSearch(depth + 1));
+
+                lblArr[i][j]->isCross = ChessLbl::unfilled;
+            }
+        }
+    }
+
+    return score - depth;
 }
 
 //block QComobox signals
