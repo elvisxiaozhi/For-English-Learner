@@ -39,6 +39,11 @@ private:
     static const int playWithAFriend;
     static const int draw;
     static const int notWin;
+    static const int infinityScore;
+    static const int infinitesimalScore;
+    static const int oWonScore;
+    static const int xWonScore;
+    static const int drawScore;
     ResultWidget *result;
 
     void setWidgetLayout();
@@ -48,11 +53,6 @@ private:
     void blockToolBtnSignals();
     void computerTurn();
     void easyMode();
-    QVector<std::pair<std::pair<int, int>, int > > getAvaiablePlaces();
-    QVector<std::pair<std::pair<int, int>, int > > miniMax(int);
-    int search();
-    std::tuple<int, int, int> findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
-    int returnUnfilledPieces();
     void miniMax();
     int maxSearch(int);
     int minSearch(int);
@@ -63,7 +63,6 @@ protected:
 private slots:
     void toolBtnClicked(bool);
     void lblClicked(int, int);
-    void putPiece(int, int);
     void showGameOverResult();
     void restartGame();
 };
