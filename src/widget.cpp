@@ -23,6 +23,7 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
 
     isXTurn = true;
+    isComputerTurn = false;
 
     loop(3, 3, [this](int i, int){ lblArr[i] = new ChessLbl *[3]; });
 
@@ -51,7 +52,7 @@ void Widget::setWidgetLayout()
     ui->difficultyMode->addItem("Play against a friend");
 
     //set the default game mode to Medium;
-    ui->difficultyMode->setCurrentIndex(playWithAFriend);
+    ui->difficultyMode->setCurrentIndex(impossible);
 
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
@@ -96,7 +97,7 @@ void Widget::setLbl()
     });
 }
 
-int Widget::checkWin()
+int Widget::returnUnfilledPieces()
 {
     int unfilledPieces = 0;
     loop(3, 3, [this, &unfilledPieces](int i, int j){
@@ -104,7 +105,13 @@ int Widget::checkWin()
             ++unfilledPieces;
         }
     });
-    if(unfilledPieces == 0) {
+
+    return unfilledPieces;
+}
+
+int Widget::checkWin()
+{
+    if(returnUnfilledPieces() == 0) {
         return draw;
     }
 
@@ -184,7 +191,7 @@ void Widget::blockToolBtnSignals()
     }
 }
 
-void Widget::computerTurn()
+void Widget::makeComputerMove()
 {
     switch (ui->difficultyMode->currentIndex()) {
     case easy:
@@ -266,58 +273,58 @@ void Widget::miniMax()
     lblClicked(row, col);
 }
 
-int Widget::maxSearch(int depth)
+int Widget::maxSearch(int searchDepth)
 {
     if(checkWin() == xWon) {
-        return xWonScore + depth;
+        return xWonScore + searchDepth;
     }
     else if(checkWin() == oWon) {
-        return oWonScore + depth;
+        return oWonScore + searchDepth;
     }
     else if(checkWin() == draw) {
-        return drawScore + depth;
+        return drawScore + searchDepth;
     }
 
     int score = infinitesimalScore;
 
-    loop(3, 3, [this, &score, depth](int i, int j){
+    loop(3, 3, [this, &score, searchDepth](int i, int j){
         if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
             lblArr[i][j]->isCross = ChessLbl::cross;
 
-            score = std::max(score, minSearch(depth + 1));
+            score = std::max(score, minSearch(searchDepth + 1));
 
             lblArr[i][j]->isCross = ChessLbl::unfilled;
         }
     });
 
-    return score + depth;
+    return score + searchDepth;
 }
 
-int Widget::minSearch(int depth)
+int Widget::minSearch(int searchDepth)
 {
     if(checkWin() == xWon) {
-        return xWonScore - depth;
+        return xWonScore - searchDepth;
     }
     else if(checkWin() == oWon) {
-        return oWonScore - depth;
+        return oWonScore - searchDepth;
     }
     else if(checkWin() == draw) {
-        return drawScore - depth;
+        return drawScore - searchDepth;
     }
 
     int score = infinityScore;
 
-    loop(3, 3, [this, &score, depth](int i, int j){
+    loop(3, 3, [this, &score, searchDepth](int i, int j){
         if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
             lblArr[i][j]->isCross = ChessLbl::circle;
 
-            score = std::min(score, maxSearch(depth + 1));
+            score = std::min(score, maxSearch(searchDepth + 1));
 
             lblArr[i][j]->isCross = ChessLbl::unfilled;
         }
     });
 
-    return score - depth;
+    return score - searchDepth;
 }
 
 //block QComobox signals
@@ -348,6 +355,14 @@ void Widget::toolBtnClicked(bool)
 
         isXTurn = true;
     }
+
+    if(isComputerTurn) {
+        isComputerTurn = false;
+    }
+    else {
+        isComputerTurn = true;
+    }
+    qDebug() << isComputerTurn;
 }
 
 void Widget::lblClicked(int row, int col)
@@ -368,9 +383,13 @@ void Widget::lblClicked(int row, int col)
         ui->msLbl->setText("X Turn");
     }
 
-    toolBtnClicked(true); //this line here is very important
-
-    if(checkWin() != notWin) {
+    if(checkWin() == notWin) {
+        toolBtnClicked(true); //this line here is very important
+        if(isComputerTurn) {
+            makeComputerMove();
+        }
+    }
+    else {
         showGameOverResult();
     }
 }

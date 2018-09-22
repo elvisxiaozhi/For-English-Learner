@@ -33,6 +33,7 @@ private:
     Ui::Widget *ui;
     ChessLbl **lblArr[3];
     bool isXTurn;
+    bool isComputerTurn;
     static const int easy;
     static const int medium;
     static const int impossible;
@@ -48,10 +49,11 @@ private:
 
     void setWidgetLayout();
     void setLbl();
+    int returnUnfilledPieces();
     int checkWin();
     bool isWinning(int);
     void blockToolBtnSignals();
-    void computerTurn();
+    void makeComputerMove();
     void easyMode();
     void miniMax();
     int maxSearch(int);
