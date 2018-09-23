@@ -196,8 +196,8 @@ void Widget::makeComputerMove()
         easyMode();
         break;
     case medium: {
-        bool useMinimax = rand() % 2;
-        if(useMinimax) {
+        int useMinimax = rand() % 3;
+        if(useMinimax > 0) {
             makeBestMove();
         }
         else {
