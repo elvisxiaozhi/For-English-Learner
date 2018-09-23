@@ -362,7 +362,11 @@ void Widget::toolBtnClicked(bool)
     else {
         isComputerTurn = true;
     }
-    qDebug() << isComputerTurn;
+
+    if(returnUnfilledPieces() == 9) {
+        isXTurn = false;
+        makeComputerMove();
+    }
 }
 
 void Widget::lblClicked(int row, int col)
