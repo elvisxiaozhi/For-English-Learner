@@ -33,8 +33,6 @@ Widget::Widget(QWidget *parent) :
     setWidgetLayout();
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
-
-    connect(ui->pushButton, &QPushButton::clicked, [this](){ makeBestMove(); });
 }
 
 Widget::~Widget()
