@@ -41,7 +41,7 @@ private:
     static const int draw;
     static const int notWin;
     static const int infinityScore;
-    static const int infinitesimalScore;
+    static const int minusInfinityScore;
     static const int oWonScore;
     static const int xWonScore;
     static const int drawScore;
@@ -55,9 +55,9 @@ private:
     void blockToolBtnSignals();
     void makeComputerMove();
     void easyMode();
-    void miniMax();
-    int maxSearch(int);
-    int minSearch(int);
+    void makeBestMove();
+    int maxSearch(int, int, int);
+    int minSearch(int, int, int);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);

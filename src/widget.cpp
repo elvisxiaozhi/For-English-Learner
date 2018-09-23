@@ -11,7 +11,7 @@ const int Widget::playWithAFriend = 3;
 const int Widget::draw = 2;
 const int Widget::notWin = 3;
 const int Widget::infinityScore = 100;
-const int Widget::infinitesimalScore = -100;
+const int Widget::minusInfinityScore = -100;
 const int Widget::xWonScore = 10;
 const int Widget::oWonScore = -10;
 const int Widget::drawScore = 0;
@@ -34,7 +34,7 @@ Widget::Widget(QWidget *parent) :
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
 
-    connect(ui->pushButton, &QPushButton::clicked, [this](){ miniMax(); });
+    connect(ui->pushButton, &QPushButton::clicked, [this](){ makeBestMove(); });
 }
 
 Widget::~Widget()
@@ -200,7 +200,7 @@ void Widget::makeComputerMove()
     case medium: {
         bool useMinimax = rand() % 2;
         if(useMinimax) {
-            miniMax();
+            makeBestMove();
         }
         else {
             easyMode();
@@ -208,7 +208,7 @@ void Widget::makeComputerMove()
         break;
     }
     case impossible: {
-        miniMax();
+        makeBestMove();
         break;
     }
     default:
@@ -228,15 +228,18 @@ void Widget::easyMode()
     }
 }
 
-void Widget::miniMax()
+void Widget::makeBestMove()
 {
-    int score;
+    int score, alpha, beta;
     if(isXTurn) {
-        score = infinitesimalScore;
+        score = minusInfinityScore;
     }
     else {
         score = infinityScore;
     }
+
+    alpha = minusInfinityScore;
+    beta = infinityScore;
 
     int row = 0;
     int col = 0;
@@ -247,7 +250,7 @@ void Widget::miniMax()
                 lblArr[i][j]->isCross = isXTurn;
 
                 if(isXTurn) {
-                    int tempScore = minSearch(0);
+                    int tempScore = minSearch(0, alpha, beta);
 
                     if(tempScore > score) {
                         score = tempScore;
@@ -256,7 +259,7 @@ void Widget::miniMax()
                     }
                 }
                 else {
-                    int tempScore = maxSearch(0);
+                    int tempScore = maxSearch(0, alpha, beta);
 
                     if(tempScore < score) {
                         score = tempScore;
@@ -273,7 +276,7 @@ void Widget::miniMax()
     lblClicked(row, col);
 }
 
-int Widget::maxSearch(int searchDepth)
+int Widget::maxSearch(int searchDepth, int alpha, int beta)
 {
     if(checkWin() == xWon) {
         return xWonScore + searchDepth;
@@ -285,22 +288,34 @@ int Widget::maxSearch(int searchDepth)
         return drawScore + searchDepth;
     }
 
-    int score = infinitesimalScore;
+    int score = minusInfinityScore;
 
-    loop(3, 3, [this, &score, searchDepth](int i, int j){
-        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-            lblArr[i][j]->isCross = ChessLbl::cross;
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+                lblArr[i][j]->isCross = ChessLbl::cross;
 
-            score = std::max(score, minSearch(searchDepth + 1));
+                int tempScore = minSearch(searchDepth + 1, alpha, beta);
+                if(tempScore > score) {
+                    score = tempScore;
+                }
+                if(tempScore >= beta) {
+                    lblArr[i][j]->isCross = ChessLbl::unfilled;
+                    return score;
+                }
+                if(tempScore > alpha) {
+                    alpha = tempScore;
+                }
 
-            lblArr[i][j]->isCross = ChessLbl::unfilled;
+                lblArr[i][j]->isCross = ChessLbl::unfilled;
+            }
         }
-    });
+    }
 
     return score + searchDepth;
 }
 
-int Widget::minSearch(int searchDepth)
+int Widget::minSearch(int searchDepth, int alpha, int beta)
 {
     if(checkWin() == xWon) {
         return xWonScore - searchDepth;
@@ -314,15 +329,27 @@ int Widget::minSearch(int searchDepth)
 
     int score = infinityScore;
 
-    loop(3, 3, [this, &score, searchDepth](int i, int j){
-        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-            lblArr[i][j]->isCross = ChessLbl::circle;
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+                lblArr[i][j]->isCross = ChessLbl::circle;
 
-            score = std::min(score, maxSearch(searchDepth + 1));
+                int tempScore = maxSearch(searchDepth + 1, alpha, beta);
+                if(tempScore < score) {
+                    score = tempScore;
+                }
+                if(tempScore <= alpha) {
+                    lblArr[i][j]->isCross = ChessLbl::unfilled;
+                    return score;
+                }
+                if(tempScore < beta) {
+                    beta = tempScore;
+                }
 
-            lblArr[i][j]->isCross = ChessLbl::unfilled;
+                lblArr[i][j]->isCross = ChessLbl::unfilled;
+            }
         }
-    });
+    }
 
     return score - searchDepth;
 }
@@ -423,6 +450,7 @@ void Widget::restartGame()
     ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid #00cccc; }");
     ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid white; }");
 
+    isComputerTurn = false;
     isXTurn = true;
 
     setLbl();
