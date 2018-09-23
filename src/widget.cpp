@@ -391,7 +391,7 @@ void Widget::toolBtnClicked(bool)
     }
 
     if(returnUnfilledPieces() == 9) {
-        isXTurn = false;
+        isXTurn = true;
         makeComputerMove();
     }
 }
