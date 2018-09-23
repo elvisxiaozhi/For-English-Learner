@@ -10,6 +10,11 @@ const int Widget::impossible = 2;
 const int Widget::playWithAFriend = 3;
 const int Widget::draw = 2;
 const int Widget::notWin = 3;
+const int Widget::infinityScore = 100;
+const int Widget::infinitesimalScore = -100;
+const int Widget::xWonScore = 10;
+const int Widget::oWonScore = -10;
+const int Widget::drawScore = 0;
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -18,6 +23,7 @@ Widget::Widget(QWidget *parent) :
     ui->setupUi(this);
 
     isXTurn = true;
+    isComputerTurn = false;
 
     loop(3, 3, [this](int i, int){ lblArr[i] = new ChessLbl *[3]; });
 
@@ -27,6 +33,8 @@ Widget::Widget(QWidget *parent) :
     setWidgetLayout();
 
     connect(ui->difficultyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) { restartGame(); });
+
+    connect(ui->pushButton, &QPushButton::clicked, [this](){ miniMax(); });
 }
 
 Widget::~Widget()
@@ -44,7 +52,7 @@ void Widget::setWidgetLayout()
     ui->difficultyMode->addItem("Play against a friend");
 
     //set the default game mode to Medium;
-    ui->difficultyMode->setCurrentIndex(medium);
+    ui->difficultyMode->setCurrentIndex(impossible);
 
     ui->cross->setIcon(QIcon(":/icons/cross.png"));
     ui->circle->setIcon(QIcon(":/icons/circle.png"));
@@ -87,6 +95,18 @@ void Widget::setLbl()
 
         connect(lbl, &ChessLbl::clicked, this, &Widget::lblClicked);
     });
+}
+
+int Widget::returnUnfilledPieces()
+{
+    int unfilledPieces = 0;
+    loop(3, 3, [this, &unfilledPieces](int i, int j){
+        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+            ++unfilledPieces;
+        }
+    });
+
+    return unfilledPieces;
 }
 
 int Widget::checkWin()
@@ -171,7 +191,7 @@ void Widget::blockToolBtnSignals()
     }
 }
 
-void Widget::computerTurn()
+void Widget::makeComputerMove()
 {
     switch (ui->difficultyMode->currentIndex()) {
     case easy:
@@ -180,8 +200,7 @@ void Widget::computerTurn()
     case medium: {
         bool useMinimax = rand() % 2;
         if(useMinimax) {
-            QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
-            putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
+            miniMax();
         }
         else {
             easyMode();
@@ -189,17 +208,11 @@ void Widget::computerTurn()
         break;
     }
     case impossible: {
-        QVector<std::pair<std::pair<int, int>, int > > score = miniMax(0);
-        putPiece(std::get<0>(findBestMove(score)), std::get<1>(findBestMove(score)));
-        //        qDebug() << std::get<0>(findBestMove(score)) << std::get<1>(findBestMove(score)) << std::get<2>(findBestMove(score)) << score;
+        miniMax();
         break;
     }
     default:
         break;
-    }
-
-    if(checkWin() != notWin) {
-        showGameOverResult();
     }
 }
 
@@ -209,106 +222,109 @@ void Widget::easyMode()
         int row = rand() % 3;
         int col = rand() % 3;
         if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
-            putPiece(row, col);
-
-            if(checkWin() != notWin) {
-                showGameOverResult();
-            }
-
+            lblClicked(row, col);
             break;
         }
     }
 }
 
-QVector<std::pair<std::pair<int, int>, int > > Widget::getAvaiablePlaces()
+void Widget::miniMax()
 {
-    QVector<std::pair<std::pair<int, int>, int > > scoreVec;
-
-    loop(3, 3, [this, &scoreVec](int i, int j){
-        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-            scoreVec.push_back(std::make_pair(std::make_pair(i, j), 0));
-        }
-    });
-
-    return scoreVec;
-}
-
-QVector<std::pair<std::pair<int, int>, int > > Widget::miniMax(int depth)
-{
-    QVector<std::pair<std::pair<int, int>, int > > scores = getAvaiablePlaces();
-
-    for(int i = 0; i < scores.size(); ++i) {
-        lblArr[scores[i].first.first][scores[i].first.second]->isCross = isXTurn;
-        toolBtnClicked(true);
-
-        if(checkWin() == oWon) {
-            static const int oWonScore = -10;
-            scores[i].second = oWonScore;
-        }
-        else if(checkWin() == xWon) {
-            static const int xWonScore = 10;
-            scores[i].second = xWonScore;
-        }
-        else if(checkWin() == draw) {
-            static const int drawScore = 0;
-            scores[i].second = drawScore;
-        }
-        else {
-            QVector<std::pair<std::pair<int, int>, int > > score = miniMax(depth + 1);
-            scores[i].second = std::get<2>(findBestMove(score));
-        }
-
-        lblArr[scores[i].first.first][scores[i].first.second]->isCross = ChessLbl::unfilled;
-        toolBtnClicked(true);
-
-        if(isXTurn) {
-            scores[i].second -= depth;
-        }
-        else {
-            scores[i].second += depth;
-        }
+    int score;
+    if(isXTurn) {
+        score = infinitesimalScore;
+    }
+    else {
+        score = infinityScore;
     }
 
-    return scores;
-}
+    int row = 0;
+    int col = 0;
 
-std::tuple<int, int, int> Widget::findBestMove(QVector<std::pair<std::pair<int, int>, int> > &vec)
-{
-    int row = vec[0].first.first;
-    int col = vec[0].first.second;
-    int value = vec[0].second;
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+                lblArr[i][j]->isCross = isXTurn;
 
-    for(int i = 0; i < vec.size() - 1; ++i) {
-        if(isXTurn) {
-            if(value < vec[i + 1].second) {
-                row = vec[i + 1].first.first;
-                col = vec[i + 1].first.second;
-                value = vec[i + 1].second;
-            }
-        }
-        else {
-            if(value > vec[i + 1].second) {
-                row = vec[i + 1].first.first;
-                col = vec[i + 1].first.second;
-                value = vec[i + 1].second;
+                if(isXTurn) {
+                    int tempScore = minSearch(0);
+
+                    if(tempScore > score) {
+                        score = tempScore;
+                        row = i;
+                        col = j;
+                    }
+                }
+                else {
+                    int tempScore = maxSearch(0);
+
+                    if(tempScore < score) {
+                        score = tempScore;
+                        row = i;
+                        col = j;
+                    }
+                }
+
+                lblArr[i][j]->isCross = ChessLbl::unfilled;
             }
         }
     }
 
-
-    return std::make_tuple(row, col, value);
+    lblClicked(row, col);
 }
 
-int Widget::returnUnfilledPieces()
+int Widget::maxSearch(int searchDepth)
 {
-    int unfilledPieces = 0;
-    loop(3, 3, [this, &unfilledPieces](int i, int j){
+    if(checkWin() == xWon) {
+        return xWonScore + searchDepth;
+    }
+    else if(checkWin() == oWon) {
+        return oWonScore + searchDepth;
+    }
+    else if(checkWin() == draw) {
+        return drawScore + searchDepth;
+    }
+
+    int score = infinitesimalScore;
+
+    loop(3, 3, [this, &score, searchDepth](int i, int j){
         if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-            ++unfilledPieces;
+            lblArr[i][j]->isCross = ChessLbl::cross;
+
+            score = std::max(score, minSearch(searchDepth + 1));
+
+            lblArr[i][j]->isCross = ChessLbl::unfilled;
         }
     });
 
-    return unfilledPieces;
+    return score + searchDepth;
+}
+
+int Widget::minSearch(int searchDepth)
+{
+    if(checkWin() == xWon) {
+        return xWonScore - searchDepth;
+    }
+    else if(checkWin() == oWon) {
+        return oWonScore - searchDepth;
+    }
+    else if(checkWin() == draw) {
+        return drawScore - searchDepth;
+    }
+
+    int score = infinityScore;
+
+    loop(3, 3, [this, &score, searchDepth](int i, int j){
+        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+            lblArr[i][j]->isCross = ChessLbl::circle;
+
+            score = std::min(score, maxSearch(searchDepth + 1));
+
+            lblArr[i][j]->isCross = ChessLbl::unfilled;
+        }
+    });
+
+    return score - searchDepth;
 }
 
 //block QComobox signals
@@ -327,10 +343,6 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
 
 void Widget::toolBtnClicked(bool)
 {
-    if(returnUnfilledPieces() == 9) {
-        easyMode();
-    }
-
     if(isXTurn) {
         ui->cross->setStyleSheet("QToolButton#cross { border-bottom: 3px solid white; }");
         ui->circle->setStyleSheet("QToolButton#circle { border-bottom: 3px solid #00cccc; }");
@@ -343,34 +355,21 @@ void Widget::toolBtnClicked(bool)
 
         isXTurn = true;
     }
-}
 
-void Widget::lblClicked(int row, int col)
-{
-//    qDebug() << lblArr[row][col]->cl;
-    if(checkWin() == notWin) {
-        if(lblArr[row][col]->isCross == ChessLbl::unfilled) {
-            putPiece(row, col);
-            toolBtnClicked(true);
-        }
+    if(isComputerTurn) {
+        isComputerTurn = false;
+    }
+    else {
+        isComputerTurn = true;
+    }
 
-        if(checkWin() != notWin) {
-            showGameOverResult();
-        }
-        else if(ui->difficultyMode->currentIndex() != playWithAFriend) {
-            if(returnUnfilledPieces() >= 8) {
-                easyMode();
-            }
-            else {
-                computerTurn();
-            }
-
-            toolBtnClicked(true); //do not delete this line, it's important here
-        }
+    if(returnUnfilledPieces() == 9) {
+        isXTurn = false;
+        makeComputerMove();
     }
 }
 
-void Widget::putPiece(int row, int col)
+void Widget::lblClicked(int row, int col)
 {
     lblArr[row][col]->isCross = isXTurn;
     //block clciked piece(label) signal to prevent triggering lblClicked(int, int) function if users accidentally clicked filled piece(label)
@@ -387,6 +386,16 @@ void Widget::putPiece(int row, int col)
 
         ui->msLbl->setText("X Turn");
     }
+
+    if(checkWin() == notWin) {
+        toolBtnClicked(true); //this line here is very important
+        if(isComputerTurn) {
+            makeComputerMove();
+        }
+    }
+    else {
+        showGameOverResult();
+    }
 }
 
 void Widget::showGameOverResult()
@@ -399,6 +408,8 @@ void Widget::showGameOverResult()
     //put this after showResult(int);
     ui->cross->setText(QString::number(crossWinningTimes));
     ui->circle->setText(QString::number(circleWinningTimes));
+
+    loop(3, 3, [this](int i, int j) { lblArr[i][j]->blockSignals(true); });
 }
 
 void Widget::restartGame()

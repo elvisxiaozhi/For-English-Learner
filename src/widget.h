@@ -33,26 +33,31 @@ private:
     Ui::Widget *ui;
     ChessLbl **lblArr[3];
     bool isXTurn;
+    bool isComputerTurn;
     static const int easy;
     static const int medium;
     static const int impossible;
     static const int playWithAFriend;
     static const int draw;
     static const int notWin;
+    static const int infinityScore;
+    static const int infinitesimalScore;
+    static const int oWonScore;
+    static const int xWonScore;
+    static const int drawScore;
     ResultWidget *result;
 
     void setWidgetLayout();
     void setLbl();
+    int returnUnfilledPieces();
     int checkWin();
     bool isWinning(int);
     void blockToolBtnSignals();
-    void computerTurn();
+    void makeComputerMove();
     void easyMode();
-    QVector<std::pair<std::pair<int, int>, int > > getAvaiablePlaces();
-    QVector<std::pair<std::pair<int, int>, int > > miniMax(int);
-    int search();
-    std::tuple<int, int, int> findBestMove(QVector<std::pair<std::pair<int, int>, int > > &);
-    int returnUnfilledPieces();
+    void miniMax();
+    int maxSearch(int);
+    int minSearch(int);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
@@ -60,7 +65,6 @@ protected:
 private slots:
     void toolBtnClicked(bool);
     void lblClicked(int, int);
-    void putPiece(int, int);
     void showGameOverResult();
     void restartGame();
 };
