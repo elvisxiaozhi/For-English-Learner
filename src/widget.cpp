@@ -242,34 +242,32 @@ void Widget::makeBestMove()
     int row = 0;
     int col = 0;
 
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
-                lblArr[i][j]->isCross = isXTurn;
+    loop(3, 3, [&](int i, int j) {
+        if(lblArr[i][j]->isCross == ChessLbl::unfilled) {
+            lblArr[i][j]->isCross = isXTurn;
 
-                if(isXTurn) {
-                    int tempScore = minSearch(0, alpha, beta);
+            if(isXTurn) {
+                int tempScore = minSearch(0, alpha, beta);
 
-                    if(tempScore > score) {
-                        score = tempScore;
-                        row = i;
-                        col = j;
-                    }
+                if(tempScore > score) {
+                    score = tempScore;
+                    row = i;
+                    col = j;
                 }
-                else {
-                    int tempScore = maxSearch(0, alpha, beta);
-
-                    if(tempScore < score) {
-                        score = tempScore;
-                        row = i;
-                        col = j;
-                    }
-                }
-
-                lblArr[i][j]->isCross = ChessLbl::unfilled;
             }
+            else {
+                int tempScore = maxSearch(0, alpha, beta);
+
+                if(tempScore < score) {
+                    score = tempScore;
+                    row = i;
+                    col = j;
+                }
+            }
+
+            lblArr[i][j]->isCross = ChessLbl::unfilled;
         }
-    }
+    });
 
     lblClicked(row, col);
 }
